@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Loan Calculator</title>
+</head>
+<body>
+    <h1>Business Loan Calculator</h1>
+    <form id="loanCalculatorForm">
+        <label for="loanAmount">Loan Amount (£):</label>
+        <input type="number" id="loanAmount" required>
+
+        <label for="interestType">Interest Type:</label>
+        <select id="interestType">
+            <option value="APR">APR</option>
+            <option value="Monthly">Monthly Interest Rate</option>
+            <option value="Factor">Factor Rate</option>
+            <option value="Yield">Yield</option>
+        </select>
+
+        <label for="interestRate">Interest Rate (%):</label>
+        <input type="number" id="interestRate" step="0.01" required>
+
+        <label for="loanTerm">Loan Term (Months):</label>
+        <input type="number" id="loanTerm" required>
+
+        <label for="bankFee">Bank Fee (%):</label>
+        <input type="number" id="bankFee" step="0.1" max="15">
+
+        <button type="button" onclick="calculateLoan()">Calculate</button>
+    </form>
+
+    <h2>Results</h2>
+    <p id="results"></p>
+
+    <script src="loanCalculator.js"></script>
+</body>
+</html>
