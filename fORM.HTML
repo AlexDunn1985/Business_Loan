@@ -56,6 +56,42 @@
     #cbf-fe .labels .s.active .dot{ background:var(--cbf-teal); box-shadow:none; }
     #cbf-fe .labels .s.active{ color:var(--cbf-teal); }
 
+    /* Step context helper */
+    #cbf-fe .step-context{
+      margin: 0 22px 10px;
+      padding: 14px 18px;
+      border-radius: 14px;
+      background: #f0fafc;
+      border:1px solid #d4eef4;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+    }
+    #cbf-fe .step-count{
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      color: var(--cbf-teal);
+    }
+    #cbf-fe .step-summary{ margin:6px 0 0; font-size:15px; color:#18333a; }
+    #cbf-fe .step-checklist{
+      margin: 10px 0 0;
+      padding-left: 20px;
+      color: var(--cbf-muted);
+      font-size: 14px;
+    }
+    #cbf-fe .step-checklist li{ margin:4px 0; position:relative; }
+    #cbf-fe .step-checklist li::marker{ color: var(--cbf-teal); }
+    #cbf-fe .step-support{
+      margin-top: 12px;
+      font-size: 13px;
+      color: #0a4652;
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      align-items:center;
+    }
+    #cbf-fe .step-support a{ color:var(--cbf-teal); font-weight:600; }
+
     /* Form basics */
     #cbf-fe label { display:block; margin: 13px 0 5px; font-weight: 700; color:#122; }
     #cbf-fe .fieldline{ display:flex; align-items:center; gap:8px; }
@@ -171,6 +207,7 @@
       #cbf-fe h2{ font-size:19px; }
       #cbf-fe .headline{ padding:16px 16px 6px; }
       #cbf-fe .stepper{ padding:6px 16px 16px; }
+      #cbf-fe .step-context{ margin:0 16px 12px; padding:14px; }
       #cbf-fe .track{ height:8px; }
       #cbf-fe .labels{ font-size:11px; grid-template-columns: repeat(4,1fr); }
       #cbf-fe .step-card{ padding:16px; margin:12px 0; }
@@ -209,6 +246,17 @@
           <div class="s" id="s3"><span class="dot"></span><span>Details</span></div>
           <div class="s" id="s4"><span class="dot"></span><span>Directors</span></div>
         </div>
+      </div>
+
+      <div class="step-context" id="stepContext" aria-live="polite">
+        <div class="step-count" id="stepCount">Step 1 of 4</div>
+        <p class="step-summary" id="stepSummary">Tell us a little about your company so we know who to contact.</p>
+        <ul class="step-checklist" id="stepChecklist">
+          <li>Registered or trading name</li>
+          <li>Main contact details</li>
+          <li>Trading address (if different)</li>
+        </ul>
+        <div class="step-support">Need help? Call <a href="tel:+441277239943">01277 239943</a> or email <a href="mailto:hello@clearbusinessfinance.co.uk">hello@clearbusinessfinance.co.uk</a>.</div>
       </div>
 
       <!-- Multi-step form -->
@@ -539,6 +587,17 @@
   const stepDots=[$('#s1'),$('#s2'),$('#s3'),$('#s4')]; /* 4 steps */
   const step1=$('#step1'), step2=$('#step2'), step3=$('#step3'), directorsCard=$('#directorsCard'), completeCard=$('#completeCard');
 
+  const stepContext=$('#stepContext');
+  const stepCount=$('#stepCount');
+  const stepSummary=$('#stepSummary');
+  const stepChecklist=$('#stepChecklist');
+  const stepMeta={
+    step1:{ index:1, summary:'Tell us a little about your company so we know who to contact.', checklist:['Registered or trading name','Main contact details','Trading address (if different)'] },
+    step2:{ index:2, summary:'Pick the funding route that best fits your plans so we can tailor the next questions.', checklist:['Funding product you are interested in','Approximate amount you are looking for'] },
+    step3:{ index:3, summary:'Share the key figures behind your request so we can prepare the right options.', checklist:['Latest turnover figures','Any existing finance commitments','Notes about how the funding will help'] },
+    directorsCard:{ index:4, summary:'Confirm which directors to include and provide their personal details.', checklist:['Date of birth for each director','Home address and postcode','Confirm at least one director to include'] }
+  };
+
   const coSearch=$('#coSearch'), coResults=$('#coResults');
   const companyName=$('#companyName'), companyNumber=$('#companyNumber'), companyStatus=$('#companyStatus');
   const chStatusMsg=$('#chStatusMsg'), chAddr=$('#chAddr'), chIncorp=$('#chIncorp'), chSIC=$('#chSIC'), chSICDesc=$('#chSICDesc'), chType=$('#chType');
@@ -556,6 +615,30 @@
 
   // Stepper
   let TOTAL_STEPS=4;
+  function updateStepContext(stepId){
+    if(!stepContext) return;
+    const meta = stepMeta[stepId] || null;
+    if(!meta){
+      stepContext.classList.add('hidden');
+      stepContext.setAttribute('aria-hidden','true');
+      if(stepChecklist) stepChecklist.innerHTML='';
+      return;
+    }
+    stepContext.classList.remove('hidden');
+    stepContext.removeAttribute('aria-hidden');
+    if(stepCount) stepCount.textContent = `Step ${meta.index} of ${TOTAL_STEPS}`;
+    if(stepSummary) stepSummary.textContent = meta.summary;
+    if(stepChecklist){
+      stepChecklist.innerHTML='';
+      const list = Array.isArray(meta.checklist) ? meta.checklist : [];
+      list.forEach(item=>{
+        const li=document.createElement('li');
+        li.textContent=item;
+        stepChecklist.appendChild(li);
+      });
+      stepChecklist.classList.toggle('hidden', list.length===0);
+    }
+  }
   function getCurrentStepIndex(){
     if(!step1.classList.contains('hidden')) return 1;
     if(!step2.classList.contains('hidden')) return 2;
@@ -575,6 +658,7 @@
     document.getElementById(fromId).classList.add('hidden');
     document.getElementById(toId).classList.remove('hidden');
     setProgress(stepIndex);
+    updateStepContext(toId);
     try{ window.scrollTo({top:0, behavior:'smooth'}); }catch{}
   }
 
@@ -1547,6 +1631,7 @@
 
   // Safety: initial progress
   setProgress(1);
+  updateStepContext('step1');
 
   // ---------- Google Maps loader callback ----------
   window.cbfInitPlaces = function(){
