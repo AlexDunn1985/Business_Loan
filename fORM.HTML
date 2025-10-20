@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clear Business Finance – Multi-Step Enquiry</title>
+  <style>
+    :root {
+      --cbf-teal:#005F71; --cbf-teal-600:#0a7b94;
+      --cbf-ink:#101113; --cbf-muted:#586174;
+      --cbf-warn:#b82525; --cbf-ok:#259e4e;
+      --cbf-card:#ffffffee; --cbf-radius:16px;
+      --cbf-ring:0 0 0 3px rgba(0,95,113,.15);
+      --cbf-shadow:0 10px 30px rgba(0,0,0,.08), 0 4px 10px rgba(0,0,0,.05);
+    }
+
+    /* Backdrop */
+    #cbf-fe{
+      background:
+        radial-gradient(900px 480px at -10% -10%, #d6f3fa 0%, transparent 60%),
+        radial-gradient(1000px 560px at 110% -20%, #d1f0e4 0%, transparent 60%),
+        linear-gradient(180deg,#fff 0%, #f6fbfc 100%);
+      color:var(--cbf-ink);
+      font-family: "Inter", "Open Sans", system-ui, -apple-system, Arial, sans-serif;
+      padding: 20px 0 60px;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    #cbf-fe .container { max-width: 820px; margin: 0 auto; padding: 0 16px; }
+    #cbf-fe h2 { margin:0; font-size: 22px; letter-spacing:.2px; }
+
+    /* Card + header */
+    #cbf-fe .card {
+      background:var(--cbf-card);
+      border:1px solid #d9eef2;
+      border-radius:var(--cbf-radius);
+      box-shadow:var(--cbf-shadow);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    #cbf-fe .headline {
+      padding: 18px 22px 8px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    /* Stepper (now 4 steps) */
+    #cbf-fe .stepper{ padding: 6px 22px 18px;}
+    #cbf-fe .track{ height:6px; border-radius:999px; background:#e9f6f8; position:relative; overflow:hidden; }
+    #cbf-fe .fill{ position:absolute; left:0; top:0; bottom:0; width:25%;
+      background:linear-gradient(90deg,var(--cbf-teal), var(--cbf-teal-600)); transition: width 300ms ease; }
+    #cbf-fe .labels{ display:grid; grid-template-columns: repeat(4,1fr); gap:8px; margin-top:10px; font-size:12px; color:var(--cbf-muted);}
+    #cbf-fe .labels .s{ display:flex; gap:6px; align-items:center; min-width:0; }
+    #cbf-fe .dot{ width:10px; height:10px; border-radius:50%; background:#cfeef3; box-shadow:inset 0 0 0 2px #e9f6f8;}
+    #cbf-fe .labels .s.active .dot{ background:var(--cbf-teal); box-shadow:none; }
+    #cbf-fe .labels .s.active{ color:var(--cbf-teal); }
+
+    /* Form basics */
+    #cbf-fe label { display:block; margin: 13px 0 5px; font-weight: 700; color:#122; }
+    #cbf-fe .fieldline{ display:flex; align-items:center; gap:8px; }
+    #cbf-fe input, #cbf-fe select, #cbf-fe textarea {
+      width:100%; padding:12px 12px; margin-bottom:8px; font-size:15px; border-radius:12px;
+      border:1px solid #cfe7ec; background:#fff; color:#111; outline:none;
+      transition: border .15s ease, box-shadow .15s ease, background .2s ease;
+    }
+    #cbf-fe textarea{ min-height:88px; }
+    #cbf-fe input:focus, #cbf-fe select:focus, #cbf-fe textarea:focus { border-color: var(--cbf-teal); box-shadow: var(--cbf-ring); }
+    #cbf-fe input[readonly] { background: #f1f3f6; }
+
+    /* Cards & layout */
+    #cbf-fe .step-card { background: transparent; border-radius: 15px; padding: 22px; margin: 16px 0; border-top: 1px solid #d9eef2; position:relative; }
+    #cbf-fe .row2 {display:flex;gap:12px;} #cbf-fe .row2>* {flex:1;}
+    #cbf-fe .row3 {display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+    #cbf-fe .hidden {display:none;}
+    #cbf-fe .ch-note {font-size:13px; color:var(--cbf-teal); margin-bottom:8px;}
+    #cbf-fe .auto-field {font-size: 14px; margin-bottom:8px; background: #f5fcfc; padding: 6px 10px; border-radius:8px;}
+    #cbf-fe .banner {margin:8px 0 4px; padding:10px 12px; border-radius:10px; border:1px solid #e6eef0; background:#f7fbfc; font-size:13px;}
+    #cbf-fe .banner strong{ color:var(--cbf-teal); }
+    #cbf-fe .muted { color:#667085; font-style:italic; }
+
+    /* Dropdown list */
+    #cbf-fe .ch-dropdown-list {background:#fff; border:1px solid #b6e8cc; position:absolute; width:100%; z-index:9999; max-height:220px; overflow:auto; border-radius:10px; box-shadow: var(--cbf-shadow);}
+    #cbf-fe .ch-dropdown-item {padding:10px 14px; cursor:pointer;}
+    #cbf-fe .ch-dropdown-item:hover {background:#cfeef3;}
+
+    /* Buttons */
+    #cbf-fe .actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+    #cbf-fe button { background: linear-gradient(135deg, var(--cbf-teal), var(--cbf-teal-600)); color:#fff; font-weight:700; border: none; border-radius:12px; padding: 12px 18px; font-size:16px; margin:10px 6px 0 0; cursor:pointer; box-shadow: 0 8px 18px rgba(0,95,113,.25); }
+    #cbf-fe button.secondary { background:#eaf7f9; color:var(--cbf-teal); border:1px solid #cfe7ec; box-shadow:none; }
+    #cbf-fe button.ghost { background:transparent; color:var(--cbf-teal); border:1px dashed #cfe7ec; }
+    #cbf-fe button[disabled] {opacity:0.7;cursor:not-allowed;}
+
+    /* Feedback */
+    #cbf-fe .error {color:var(--cbf-warn); font-size:14px; min-height:20px;}
+    #cbf-fe .success {color:var(--cbf-ok); font-weight:700; margin-top:10px;}
+
+    .shake{ animation: cbfShake .4s ease both; }
+    @keyframes cbfShake{ 10%,90%{transform:translateX(-1px)} 20%,80%{transform:translateX(2px)} 30%,50%,70%{transform:translateX(-4px)} 40%,60%{transform:translateX(4px)} }
+
+    /* Directors list — now unified vertical stack */
+    #cbf-fe .dir-card{ border:1px solid #e6eef0; border-radius:12px; padding:12px; margin:10px 0; background:#fff; }
+    #cbf-fe .dir-head{ display:flex; align-items:center; gap:10px; justify-content:space-between; cursor:pointer; }
+    #cbf-fe .dir-head .name{ font-weight:700; display:flex; align-items:center; gap:8px;}
+    /* Professional chevron icon */
+    #cbf-fe .chev{ width:16px; height:16px; display:inline-block; transition: transform .18s ease; }
+    #cbf-fe .dir-card.expanded .chev{ transform: rotate(90deg); }
+    #cbf-fe .dir-body{ margin-top:10px; }
+    #cbf-fe .dir-body.disabled{ opacity:.6; pointer-events:none; }
+    #cbf-fe .dir-card.collapsed .dir-body{ display:none; }
+    /* Always stacked */
+    #cbf-fe #dirList{ display:flex; flex-direction:column; gap:12px; }
+    #cbf-fe #dirList .dir-card{ flex:1 1 100%; }
+
+    /* Info icon + tooltip */
+    #cbf-fe .info-icon{
+      width:20px; height:20px; min-width:20px;
+      display:inline-flex; align-items:center; justify-content:center;
+      border-radius:999px; border:1px solid #cfe7ec; background:#f7fbfc; cursor:pointer;
+      font-size:12px; font-weight:800; color:#0a4652; margin-left:6px;
+      transition: box-shadow .15s ease, transform .05s ease;
+    }
+    #cbf-fe .info-icon:active{ transform: scale(0.96); }
+    #cbf-fe .tip{
+      position:absolute; z-index:10; max-width:280px; background:#fff; border:1px solid #d9eef2; border-radius:10px;
+      padding:10px 12px; box-shadow:var(--cbf-shadow); font-size:13px; color:#0a4652; display:none;
+    }
+    #cbf-fe .tip.visible{ display:block; }
+    #cbf-fe .tip p{ margin:0; }
+
+    /* Success hero (tick) */
+    #cbf-fe .success-hero{ display:flex; align-items:center; gap:12px; margin:8px 0 10px; }
+    #cbf-fe .success-hero .tick{
+      width:48px; height:48px; border-radius:50%;
+      background:#eaf7f0; border:2px solid #cfe9d9;
+      display:flex; align-items:center; justify-content:center;
+      box-shadow: 0 4px 12px rgba(37,158,78,.15);
+    }
+    #cbf-fe .success-hero .tick svg{ width:28px; height:28px; }
+    #cbf-fe .success-note{ font-size:14px; color:#0f5132; background:#ecfdf3; border:1px solid #d1f7df; padding:10px 12px; border-radius:10px; }
+
+    /* Confetti overlay */
+    #cbf-confetti{ position:fixed; inset:0; pointer-events:none; overflow:visible; z-index:99999; }
+    .cbf-confetti-piece{
+      position:absolute; top:-12px; width:8px; height:14px; opacity:.95;
+      will-change: transform, opacity;
+      animation: cbfConfettiFall linear forwards;
+    }
+    @keyframes cbfConfettiFall{
+      to { transform: translate3d(var(--dx, 0px), 110vh, 0) rotate(var(--rot, 720deg)); opacity:1; }
+    }
+
+    /* Print only the summary neatly */
+    @media print {
+      body * { visibility: hidden; }
+      #cbf-fe #summaryCard, #cbf-fe #summaryCard * { visibility: visible; }
+      #cbf-fe #summaryCard { position: absolute; left: 0; top: 0; width: 100%; }
+      #cbf-fe .no-print { display:none !important; }
+    }
+
+    @media (max-width: 900px){
+      #cbf-fe .container{ padding:0 14px; }
+      #cbf-fe h2{ font-size:20px; }
+      #cbf-fe .step-card{ padding:20px; }
+      #cbf-fe .labels{ grid-template-columns: repeat(4,1fr); row-gap:10px; column-gap:8px; }
+      #cbf-fe .row3{ grid-template-columns:repeat(2,1fr); }
+      #cbf-fe .summary .kv b{ min-width:180px; }
+    }
+    @media (max-width: 600px){
+      #cbf-fe .container{ padding:0 12px; }
+      #cbf-fe h2{ font-size:19px; }
+      #cbf-fe .headline{ padding:16px 16px 6px; }
+      #cbf-fe .stepper{ padding:6px 16px 16px; }
+      #cbf-fe .track{ height:8px; }
+      #cbf-fe .labels{ font-size:11px; grid-template-columns: repeat(4,1fr); }
+      #cbf-fe .step-card{ padding:16px; margin:12px 0; }
+      #cbf-fe .row2{ display:grid; grid-template-columns:1fr; gap:10px; }
+      #cbf-fe .row3{ grid-template-columns:1fr; gap:10px; }
+      #cbf-fe input, #cbf-fe select, #cbf-fe textarea{ font-size:16px; padding:12px 12px; }
+      #cbf-fe .actions{ flex-direction:column; }
+      #cbf-fe button, #cbf-fe button.secondary, #cbf-fe button.ghost{ width:100%; margin:8px 0 0 0; padding:14px 16px; font-size:16px; }
+      #cbf-fe .toggle{ gap:10px; }
+      #cbf-fe .toggle .pill{ padding:10px 14px; }
+      #cbf-fe .summary .kv{ flex-direction:column; gap:4px; }
+      #cbf-fe .summary .kv b{ min-width:0; }
+      #cbf-fe .dir-head{ flex-direction:row; align-items:center; gap:8px; }
+      #cbf-fe .ch-dropdown-list{ max-height:260px; }
+    }
+    @media (prefers-reduced-motion: reduce){
+      #cbf-fe .fill{ transition:none; }
+      .shake{ animation:none; }
+    }
+  </style>
+</head>
+<body>
+<div id="cbf-fe">
+  <div class="container">
+    <div class="card">
+      <div class="headline">
+        <h2>Apply for Funding Today</h2>
+      </div>
+
+      <!-- Stepper -->
+      <div class="stepper">
+        <div class="track"><div class="fill" id="progFill"></div></div>
+        <div class="labels" id="stepLabels">
+          <div class="s active" id="s1"><span class="dot"></span><span>Company</span></div>
+          <div class="s" id="s2"><span class="dot"></span><span>Funding</span></div>
+          <div class="s" id="s3"><span class="dot"></span><span>Details</span></div>
+          <div class="s" id="s4"><span class="dot"></span><span>Directors</span></div>
+        </div>
+      </div>
+
+      <!-- Multi-step form -->
+      <form id="cbfForm" autocomplete="off">
+        <!-- Step 1 -->
+        <div id="step1" class="step-card">
+          <div class="banner"><strong>Sole Traders:</strong> please call the office on <b>01277 239943</b> so we can discuss your enquiry.</div>
+
+          <label for="coSearch">Company Name</label>
+          <input id="coSearch" type="text" autocomplete="off" placeholder="Start typing..." required>
+          <div id="coResults" style="position:relative"></div>
+          <input type="hidden" id="companyName">
+          <input type="hidden" id="companyNumber">
+          <input type="hidden" id="companyStatus">
+          <div id="chStatusMsg" class="ch-note"></div>
+
+          <div id="chExtraFields" class="hidden">
+            <div class="auto-field"><b>Registered Office:</b> <span id="chAddr"></span></div>
+            <div class="auto-field"><b>Incorporated:</b> <span id="chIncorp"></span></div>
+            <div class="auto-field"><b>Nature of Business (SIC code):</b> <span id="chSIC"></span></div>
+            <div class="auto-field"><b>SIC Description:</b> <span id="chSICDesc"></span></div>
+            <div class="auto-field"><b>Company Type:</b> <span id="chType"></span></div>
+          </div>
+
+          <div id="directorWrap" class="hidden">
+            <label for="directorSel">Contact</label>
+            <select id="directorSel">
+              <option value="">-- Select --</option>
+            </select>
+          </div>
+
+          <div id="otherContactWrap" class="hidden">
+            <div class="row2">
+              <div>
+                <label for="otherContactName">Contact Name</label>
+                <input id="otherContactName" type="text" maxlength="120" placeholder="e.g. Jane Smith">
+              </div>
+              <div>
+                <label for="otherContactTitle">Job Title</label>
+                <input id="otherContactTitle" type="text" maxlength="120" placeholder="e.g. Operations Manager">
+              </div>
+            </div>
+          </div>
+
+          <label for="contactNumber">Contact Number</label>
+          <input id="contactNumber" type="tel" maxlength="16" placeholder="07123 456789" required>
+
+          <label for="email">Email Address</label>
+          <input id="email" type="email" placeholder="you@yourcompany.com" required>
+
+          <label for="tradingAddress">Trading Address (if different)</label>
+          <input id="tradingAddress" type="text" maxlength="200" placeholder="Start typing address or business name (UK)" data-places="true">
+
+          <label for="website">Company Website</label>
+          <input id="website" type="text" maxlength="200" placeholder="Optional">
+
+          <label for="employees">Number of Employees</label>
+          <input id="employees" type="number" min="1" max="100000" placeholder="Optional">
+
+          <label for="referral">Who referred you?</label>
+          <input id="referral" type="text" maxlength="120" placeholder="Optional">
+
+          <fieldset class="cb-inline" style="border:0;padding:0;margin-top:8px;">
+            <legend class="legend-inline">Best time to call</legend>
+            <div class="toggle" role="radiogroup" aria-label="Call preference">
+              <input type="radio" name="cbPref" id="cbPrefAsap" value="ASAP" checked>
+              <label class="pill" for="cbPrefAsap">ASAP</label>
+
+              <input type="radio" name="cbPref" id="cbPrefPick" value="PICK">
+              <label class="pill" for="cbPrefPick">Pick a date &amp; time</label>
+            </div>
+            <div id="openState" class="banner" aria-live="polite"></div>
+          </fieldset>
+
+          <div id="cbWhenWrap" class="hidden">
+            <label for="cbDT">Preferred date &amp; time (UK)</label>
+            <input id="cbDT" type="datetime-local" step="900">
+            <div id="cbNote" class="banner" style="display:none;"></div>
+          </div>
+
+          <div class="error" id="step1error"></div>
+          <div class="actions">
+            <button type="button" id="next1">Next</button>
+          </div>
+        </div>
+        <!-- Step 2 -->
+        <div id="step2" class="step-card hidden">
+          <label for="fundingType">Type of Funding Required</label>
+          <select id="fundingType" required data-label="Type of Funding Required">
+            <option value="">-- Select --</option>
+            <option value="business">Business Loan</option>
+            <option value="asset">Asset Finance</option>
+            <option value="invoice">Invoice Finance</option>
+            <option value="tax">VAT &amp; Tax Funding</option>
+          </select>
+          <div class="error" id="step2error"></div>
+          <div class="actions">
+            <button type="button" class="secondary" id="back2">Back</button>
+            <button type="button" id="next2">Next</button>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div id="step3" class="step-card hidden">
+          <div id="questions"></div>
+          <div class="error" id="step3error"></div>
+          <div class="actions">
+            <button type="button" class="secondary" id="back3">Back</button>
+            <button type="button" id="detailsContinue">Continue</button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Step 4: Directors -->
+      <div id="directorsCard" class="step-card hidden">
+        <div id="dirBanner"></div>
+        <h3 style="margin:8px 0 6px">Directors – details required</h3>
+        <p class="muted" id="dirIntro">Please complete the directors’ details below to proceed. If you don’t have them to hand, you can <strong>Skip and Submit</strong> and we’ll follow up.</p>
+        <div id="dirList"></div>
+        <div class="error" id="dirError"></div>
+        <div class="actions">
+          <button type="button" class="secondary" id="backToDetails">Back</button>
+          <button type="button" id="submitDirectors">Submit</button>
+          <button type="button" class="ghost" id="skipDirectors">Skip and Submit</button>
+        </div>
+      </div>
+
+      <!-- Complete -->
+      <div id="completeCard" class="step-card hidden">
+        <h3>Thank you – we’ve got everything we need</h3>
+        <p class="muted">A specialist will be in touch shortly.</p>
+      </div>
+
+      <!-- Hours footer -->
+      <div class="step-card" style="text-align:center;">
+        <p class="muted">Office hours: Mon–Fri 08:30–17:30 (UK). Closed UK bank holidays and 24 Dec–1 Jan.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="cbf-confetti" aria-hidden="true"></div>
+</div>
+<!-- --- ClickDimensions Form Capture --- -->
+<form id="cdForm" action="https://analytics-eu.clickdimensions.com/forms/h/aFgIiTNR1i0yBUlFx7SABx" method="post" style="display:none!important;">
+  <!-- Company -->
+  <input id="cd_txtCompanyName" name="txtCompanyName" type="text">
+  <input id="cd_txtCompanyRegNum" name="txtCompanyRegNum" type="text">
+  <input id="cd_txtStatus" name="txtStatus" type="text">
+
+  <!-- Registered Office (split) -->
+  <input id="cd_txtRegOfficeStreet1"  name="txtRegOfficeStreet1"  type="text">
+  <input id="cd_txtRegOfficeStreet2"  name="txtRegOfficeStreet2"  type="text">
+  <input id="cd_txtRegOfficeStreet3"  name="txtRegOfficeStreet3"  type="text">
+  <input id="cd_txtRegOfficeCity"     name="txtRegOfficeCity"     type="text">
+  <input id="cd_txtRegOfficeCounty"   name="txtRegOfficeCounty"   type="text">
+  <input id="cd_txtRegOfficeCountry"  name="txtRegOfficeCountry"  type="text">
+  <input id="cd_txtRegOfficePostcode" name="txtRegOfficePostcode" type="text">
+
+  <input id="cd_dtIncorporationDate" name="dtIncorporationDate" type="text">
+  <input id="cd_txtSICCode"          name="txtSICCode"          type="text">
+  <input id="cd_txtCompanyType"      name="txtCompanyType"      type="text">
+
+  <!-- Contact -->
+  <input id="cd_txtContactName"         name="txtContactName"         type="text">
+  <input id="cd_txtContactJobTitle"     name="txtContactJobTitle"     type="text">
+  <input id="cd_txtContactNumber"       name="txtContactNumber"       type="text">
+  <input id="cd_txtContactEmailAddress" name="txtContactEmailAddress" type="email">
+
+  <!-- Trading Address (split mapping) -->
+  <input id="cd_txtTradingAddStreet1"  name="txtTradingAddStreet1"  type="text">
+  <input id="cd_txtTradingAddStreet2"  name="txtTradingAddStreet2"  type="text">
+  <input id="cd_txtTradingAddStreet3"  name="txtTradingAddStreet3"  type="text">
+  <input id="cd_txtTradingAddCity"     name="txtTradingAddCity"     type="text">
+  <input id="cd_txtTradingAddCounty"   name="txtTradingAddCounty"   type="text">
+  <input id="cd_txtTradingAddCountry"  name="txtTradingAddCountry"  type="text">
+  <input id="cd_txtTradingAddPostcode" name="txtTradingAddPostcode" type="text">
+
+  <input id="cd_urlCompanyWebsite" name="urlCompanyWebsite" type="text">
+  <input id="cd_intNumOfEmployees" name="intNumOfEmployees" type="text">
+  <input id="cd_txtReferredBy"     name="txtReferredBy"     type="text">
+  <input id="cd_dtCallBackDateTime" name="dtCallBackDateTime" type="text">
+
+  <!-- Funding -->
+  <input id="cd_txtLeadCategory" name="txtLeadCategory" type="text">
+
+  <!-- Business Loan -->
+  <input id="cd_txtTopic"                           name="txtTopic"                           type="text">
+  <input id="cd_txtIsthisLoanSecuredorUnsecured"    name="txtIsthisLoanSecuredorUnsecured"    type="text">
+  <input id="cd_decAnnualTurnover"                  name="decAnnualTurnover"                  type="text">
+  <input id="cd_decFinanceAmount"                   name="decFinanceAmount"                   type="text">
+  <input id="cd_decLastFinancialYearProfit"         name="decLastFinancialYearProfit"         type="text">
+  <input id="cd_txtHomeOwner"                       name="txtHomeOwner"                       type="text">
+  <input id="cd_txtAnyExistingLoansorFinance"       name="txtAnyExistingLoansorFinance"       type="text">
+  <input id="cd_decMonthlyBusinessLoanRepayments"   name="decMonthlyBusinessLoanRepayments"   type="text">
+  <input id="cd_txtPaymentsTakenViaCardTerminal"    name="txtPaymentsTakenViaCardTerminal"    type="text">
+  <input id="cd_decMonthlyCardTerminalIncome"       name="decMonthlyCardTerminalIncome"       type="text">
+  <!-- Asset Finance -->
+  <input id="cd_txtAssetType"               name="txtAssetType"               type="text">
+  <input id="cd_txtOtherAssetType"          name="txtOtherAssetType"          type="text">
+  <input id="cd_txtNewOrUsed"               name="txtNewOrUsed"               type="text">
+  <input id="cd_txtAssetFinance_FinanceType" name="txtAssetFinance-FinanceType" type="text">
+  <input id="cd_txtSupplierName"            name="txtSupplierName"            type="text">
+  <input id="cd_decAssetCost"               name="decAssetCost"               type="text">
+  <input id="cd_decDeposit"                 name="decDeposit"                 type="text">
+  <input id="cd_intTerm"                    name="intTerm"                    type="text">
+
+  <!-- Invoice Finance -->
+  <input id="cd_decAverageMonthlyTurnover"  name="decAverageMonthlyTurnover"  type="text">
+  <input id="cd_intAverageDebtorDays"       name="intAverageDebtorDays"       type="text">
+  <input id="cd_intNumberofActiveCustomers" name="intNumberofActiveCustomers" type="text">
+  <input id="cd_txtCurrentInvoiceFinance"   name="txtCurrentInvoiceFinance"   type="text">
+  <input id="cd_txtCurrentLender"           name="txtCurrentLender"           type="text">
+  <input id="cd_decCurrentFacilityLimit"    name="decCurrentFacilityLimit"    type="text">
+
+  <!-- Tax -->
+  <input id="cd_txtTaxType"             name="txtTaxType"             type="text">
+  <input id="cd_dtDueDate"              name="dtDueDate"              type="text">
+  <input id="cd_txtPaymentPlanwithHMRC" name="txtPaymentPlanwithHMRC" type="text">
+
+  <!-- Directors 1–5 -->
+  <input id="cd_txtDirectorName1" name="txtDirectorName1" type="text">
+  <input id="cd_txtDirectorName2" name="txtDirectorName2" type="text">
+  <input id="cd_txtDirectorName3" name="txtDirectorName3" type="text">
+  <input id="cd_txtDirectorName4" name="txtDirectorName4" type="text">
+  <input id="cd_txtDirectorName5" name="txtDirectorName5" type="text">
+
+  <input id="cd_txtDirectorDoB1" name="txtDirectorDoB1" type="text">
+  <input id="cd_txtDirectorDoB2" name="txtDirectorDoB2" type="text">
+  <input id="cd_txtDirectorDoB3" name="txtDirectorDoB3" type="text">
+  <input id="cd_txtDirectorDoB4" name="txtDirectorDoB4" type="text">
+  <input id="cd_txtDirectorDoB5" name="txtDirectorDoB5" type="text">
+
+  <input id="cd_txtDirectorPostCode1" name="txtDirectorPostCode1" type="text">
+  <input id="cd_txtDirectorPostCode2" name="txtDirectorPostCode2" type="text">
+  <input id="cd_txtDirectorPostCode3" name="txtDirectorPostCode3" type="text">
+  <input id="cd_txtDirectorPostCode4" name="txtDirectorPostCode4" type="text">
+  <input id="cd_txtDirectorPostCode5" name="txtDirectorPostCode5" type="text">
+
+  <input id="cd_txtDirectorTownCity1" name="txtDirectorTown/City1" type="text">
+  <input id="cd_txtDirectorTownCity2" name="txtDirectorTown/City2" type="text">
+  <input id="cd_txtDirectorTownCity3" name="txtDirectorTown/City3" type="text">
+  <input id="cd_txtDirectorTownCity4" name="txtDirectorTown/City4" type="text">
+  <input id="cd_txtDirectorTownCity5" name="txtDirectorTown/City5" type="text">
+
+  <!-- Home Address lines -->
+  <input id="cd_txtDirectorHomeAddress1_1" name="txtDirectorHomeAddress1-1" type="text">
+  <input id="cd_txtDirectorHomeAddress1_2" name="txtDirectorHomeAddress1-2" type="text">
+  <input id="cd_txtDirectorHomeAddress1_3" name="txtDirectorHomeAddress1-3" type="text">
+  <input id="cd_txtDirectorHomeAddress1_4" name="txtDirectorHomeAddress1-4" type="text">
+  <input id="cd_txtDirectorHomeAddress1_5" name="txtDirectorHomeAddress1-5" type="text">
+
+  <input id="cd_txtDirectorHomeAddress2_1" name="txtDirectorHomeAddress2-1" type="text">
+  <input id="cd_txtDirectorHomeAddress2_2" name="txtDirectorHomeAddress2-2" type="text">
+  <input id="cd_txtDirectorHomeAddress2_3" name="txtDirectorHomeAddress2-3" type="text">
+  <input id="cd_txtDirectorHomeAddress2_4" name="txtDirectorHomeAddress2-4" type="text">
+  <input id="cd_txtDirectorHomeAddress2_5" name="txtDirectorHomeAddress2-5" type="text">
+
+  <input id="cd_txtDirectorHomeAddress3_1" name="txtDirectorHomeAddress3-1" type="text">
+  <input id="cd_txtDirectorHomeAddress3_2" name="txtDirectorHomeAddress3-2" type="text">
+  <input id="cd_txtDirectorHomeAddress3_3" name="txtDirectorHomeAddress3-3" type="text">
+  <input id="cd_txtDirectorHomeAddress3_4" name="txtDirectorHomeAddress3-4" type="text">
+  <input id="cd_txtDirectorHomeAddress3_5" name="txtDirectorHomeAddress3-5" type="text">
+
+  <input id="cd_txtDirectorHomeAddress4_1" name="txtDirectorHomeAddress4-1" type="text">
+  <input id="cd_txtDirectorHomeAddress4_2" name="txtDirectorHomeAddress4-2" type="text">
+  <input id="cd_txtDirectorHomeAddress4_3" name="txtDirectorHomeAddress4-3" type="text">
+  <input id="cd_txtDirectorHomeAddress4_4" name="txtDirectorHomeAddress4-4" type="text">
+  <input id="cd_txtDirectorHomeAddress4_5" name="txtDirectorHomeAddress4-5" type="text">
+
+  <input id="cd_txtDirectorHomeAddress5_1" name="txtDirectorHomeAddress5-1" type="text">
+  <input id="cd_txtDirectorHomeAddress5_2" name="txtDirectorHomeAddress5-2" type="text">
+  <input id="cd_txtDirectorHomeAddress5_3" name="txtDirectorHomeAddress5-3" type="text">
+  <input id="cd_txtDirectorHomeAddress5_4" name="txtDirectorHomeAddress5-4" type="text">
+  <input id="cd_txtDirectorHomeAddress5_5" name="txtDirectorHomeAddress5-5" type="text">
+
+  <input id="cd_txtClearURL" name="txtClearURL" type="text">
+</form>
+
+<!-- ClickDimensions tracking -->
+<script type="text/javascript" src="https://analytics-eu.clickdimensions.com/ts.js"></script>
+<script type="text/javascript">
+  var cdAnalytics = new clickdimensions.Analytics('analytics-eu.clickdimensions.com');
+  cdAnalytics.setAccountKey('aIJAYwnBD20qHXkTKjQsyg');
+  cdAnalytics.setDomain('clearbusinessfinance.com');
+  cdAnalytics.setScore(typeof(cdScore) == "undefined" ? 0 : (cdScore == 0 ? null : cdScore));
+  cdAnalytics.trackPage();
+</script>
+
+<!-- App script -->
+<script>
+(function(){
+  const CH_PROXY_BASE = 'https://clear-ch-proxy.onrender.com';
+  const CH_SECRET = 's3cure-CH-proxy-2025!clearbf';
+  const CH_HEADERS = { 'x-ch-secret': CH_SECRET };
+  const HOURS = { open: "08:30", close: "17:30" };
+
+  // ---- Utilities ----
+  const $  = (sel, scope) => (scope || document).querySelector(sel);
+  const $$ = (sel, scope) => Array.from((scope || document).querySelectorAll(sel));
+  const cleanNumberForCalc = (v) => v==null ? '' : String(v).trim().replace(/,/g,'').replace(/[£%]/g,'');
+  const fmtGBP = (v) => { const n = Number(cleanNumberForCalc(v)); return Number.isNaN(n) ? String(v||'') : n.toLocaleString('en-GB',{minimumFractionDigits:2, maximumFractionDigits:2}); };
+  const fmtNum = (v) => { const n = Number(cleanNumberForCalc(v)); return Number.isNaN(n) ? String(v||'') : n.toLocaleString('en-GB',{maximumFractionDigits:2, minimumFractionDigits:0}); };
+  const getNumericValue = (el) => { const s = cleanNumberForCalc((typeof el==='string' ? $(el) : el)?.value || ''); const n = Number(s); return Number.isNaN(n) ? null : n; };
+  const valOrDash = (v) => (v && String(v).trim()!=='') ? v : '—';
+
+  // Confetti
+  function fireConfetti(count=120){
+    let root = document.getElementById('cbf-confetti');
+    if(!root){ root = document.createElement('div'); root.id='cbf-confetti'; root.setAttribute('aria-hidden','true'); document.body.appendChild(root); }
+    const colours = ['#22c55e','#60a5fa','#f59e0b','#ef4444','#a78bfa','#14b8a6','#e11d48','#10b981','#f97316'];
+    for(let i=0;i<count;i++){
+      const p = document.createElement('div'); p.className='cbf-confetti-piece';
+      const size = 6 + Math.random()*8;
+      p.style.width = (size*0.6)+'px'; p.style.height = size+'px'; p.style.left = (Math.random()*100)+'%';
+      p.style.background = colours[(Math.random()*colours.length)|0];
+      p.style.opacity = (0.8 + Math.random()*0.2).toFixed(2);
+      p.style.setProperty('--dx', ((Math.random()*2-1)*120)+'px');
+      p.style.setProperty('--rot', (360 + Math.random()*720)+'deg');
+      p.style.animationDuration = (1.6 + Math.random()*1.6)+'s';
+      p.style.animationDelay = (Math.random()*0.2)+'s';
+      root.appendChild(p);
+      setTimeout(()=>{ p.remove(); }, 3500);
+    }
+    setTimeout(()=>{ root.innerHTML=''; }, 4000);
+  }
+  // ---- DOM ----
+  const progFill=$('#progFill');
+  const stepDots=[$('#s1'),$('#s2'),$('#s3'),$('#s4')]; /* 4 steps */
+  const step1=$('#step1'), step2=$('#step2'), step3=$('#step3'), directorsCard=$('#directorsCard'), completeCard=$('#completeCard');
+
+  const coSearch=$('#coSearch'), coResults=$('#coResults');
+  const companyName=$('#companyName'), companyNumber=$('#companyNumber'), companyStatus=$('#companyStatus');
+  const chStatusMsg=$('#chStatusMsg'), chAddr=$('#chAddr'), chIncorp=$('#chIncorp'), chSIC=$('#chSIC'), chSICDesc=$('#chSICDesc'), chType=$('#chType');
+
+  const directorWrap=$('#directorWrap'), directorSel=$('#directorSel');
+  const otherContactWrap=$('#otherContactWrap'), otherContactName=$('#otherContactName'), otherContactTitle=$('#otherContactTitle');
+
+  const contactNumber=$('#contactNumber'), email=$('#email');
+  const questions=$('#questions');
+  const dirList=$('#dirList'), dirError=$('#dirError'), dirBanner=$('#dirBanner');
+
+  // Callback controls
+  const cbPrefAsap=$('#cbPrefAsap'), cbPrefPick=$('#cbPrefPick');
+  const cbWhenWrap=$('#cbWhenWrap'), cbDT=$('#cbDT'), openState=$('#openState');
+
+  // Stepper
+  let TOTAL_STEPS=4;
+  function getCurrentStepIndex(){
+    if(!step1.classList.contains('hidden')) return 1;
+    if(!step2.classList.contains('hidden')) return 2;
+    if(!step3.classList.contains('hidden')) return 3;
+    if(!directorsCard.classList.contains('hidden')) return 4;
+    return 1;
+  }
+  function setProgress(step){
+    const pct = Math.max(1, Math.min(TOTAL_STEPS, step)) / TOTAL_STEPS * 100;
+    if(progFill) progFill.style.width = pct + '%';
+    stepDots.forEach((el,i)=> el && el.classList.toggle('active', i < step));
+  }
+  setProgress(1);
+  function configureStepperForFundingType(){ setProgress(getCurrentStepIndex()); }
+
+  function goto(fromId,toId,stepIndex){
+    document.getElementById(fromId).classList.add('hidden');
+    document.getElementById(toId).classList.remove('hidden');
+    setProgress(stepIndex);
+    try{ window.scrollTo({top:0, behavior:'smooth'}); }catch{}
+  }
+
+  // Companies House search (unchanged) ...
+  let chTimer=null;
+  function debounce(fn,ms){return(...a)=>{clearTimeout(chTimer);chTimer=setTimeout(()=>fn(...a),ms);};}
+  function clearDropdown(){ coResults.innerHTML=''; }
+  function renderDropdown(items){
+    if(!items||!items.length){ clearDropdown(); return; }
+    const box=document.createElement('div'); box.className='ch-dropdown-list';
+    items.slice(0,20).forEach(x=>{
+      const div=document.createElement('div'); div.className='ch-dropdown-item';
+      div.textContent=`${x.title} (${x.company_number})`;
+      div.onclick=()=>{
+        coSearch.value=x.title;
+        companyName.value=x.title;
+        companyNumber.value=x.company_number;
+        getCompanyStatus(x.company_number);
+        clearDropdown();
+      };
+      box.appendChild(div);
+    });
+    coResults.innerHTML=''; coResults.appendChild(box);
+  }
+  async function searchCompaniesHouse(q){
+    if(!q||q.length<3){ clearDropdown(); return; }
+    try{
+      const res=await fetch(`${CH_PROXY_BASE}/companies-house/search?q=${encodeURIComponent(q)}`,{headers:CH_HEADERS});
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data=await res.json();
+      renderDropdown((data && data.items) ? data.items : []);
+    }catch(e){ clearDropdown(); }
+  }
+  coSearch.addEventListener('input', debounce(()=>searchCompaniesHouse(coSearch.value.trim()),300));
+  document.addEventListener('click',(e)=>{ if(!coResults.contains(e.target) && e.target!==coSearch) clearDropdown(); });
+
+  // Map Registered Office to CD split fields
+  function mapCHRegisteredOfficeToCD(roa){
+    const line1Core = [ (roa.premises||'').trim(), (roa.address_line_1||'').trim() ].filter(Boolean).join(', ');
+    const street1 = line1Core || (roa.care_of ? (`c/o ${roa.care_of}`) : '');
+    const street2 = (roa.address_line_2 || roa.po_box || '').trim();
+    const street3 = (roa.region || '').trim();
+    const city    = (roa.locality || '').trim();
+    const postcode= (roa.postal_code || '').trim();
+    const country = (roa.country || 'United Kingdom').trim();
+
+    setVal('cd_txtRegOfficeStreet1', street1);
+    setVal('cd_txtRegOfficeStreet2', street2);
+    setVal('cd_txtRegOfficeStreet3', street3);
+    setVal('cd_txtRegOfficeCity',    city);
+    setVal('cd_txtRegOfficeCounty',  street3);
+    setVal('cd_txtRegOfficeCountry', country);
+    setVal('cd_txtRegOfficePostcode',postcode);
+  }
+
+  async function getCompanyStatus(number){
+    chStatusMsg.textContent="Checking status…";
+    companyStatus.value="";
+    directorWrap.classList.add("hidden"); $('#chExtraFields').classList.add("hidden");
+    otherContactWrap.classList.add('hidden');
+    otherContactName.value=''; otherContactTitle.value='';
+    chAddr.textContent=''; chIncorp.textContent=''; chSIC.textContent=''; chSICDesc.textContent=''; chType.textContent='';
+    try{
+      const res=await fetch(`${CH_PROXY_BASE}/companies-house/${encodeURIComponent(number)}`,{headers:CH_HEADERS});
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const chData=await res.json();
+      const status=(chData&&chData.company_status)?chData.company_status:''; companyStatus.value=status;
+      chStatusMsg.textContent=(status && status.toLowerCase()==="active")?"Status: Active":`Status: ${status||"Unknown"}`;
+      if(chData){
+        const roa = chData.registered_office_address || {};
+        chAddr.textContent = Object.values(roa).filter(Boolean).join(', ');
+        chIncorp.textContent=chData.date_of_creation||'';
+        const sics=(chData.sic_codes||[]);
+        chSIC.textContent=sics.join(', ');
+        chType.textContent=chData.type||'';
+        $('#chExtraFields').classList.remove('hidden');
+        mapCHRegisteredOfficeToCD(roa);
+
+        if(sics.length){
+          try{
+            const descs = await Promise.all(sics.map(async code=>{
+              try{
+                const r = await fetch(`${CH_PROXY_BASE}/companies-house/sic/${encodeURIComponent(code)}`,{headers:CH_HEADERS});
+                if(!r.ok) return null; const j = await r.json(); return j && (j.description||j.desc||null);
+              }catch(_){return null}
+            }));
+            const final = descs.filter(Boolean).join(' · ');
+            if(final) chSICDesc.textContent = final;
+          }catch(_){}
+        }
+      }
+      if((status||'').toLowerCase()==="active") loadOfficers(number);
+    }catch(e){ chStatusMsg.textContent="Couldn't confirm company status."; }
+  }
+
+  let activeDirectors=[];
+  async function loadOfficers(num){
+    directorSel.innerHTML='<option value="">-- Select --</option>';
+    try{
+      const res=await fetch(`${CH_PROXY_BASE}/companies-house/${encodeURIComponent(num)}/officers`,{headers:CH_HEADERS});
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data=await res.json();
+      const active=(data.items||[]).filter(o=>!o.resigned_on);
+      activeDirectors = active.map(o=> o.name).filter(Boolean);
+      active.forEach(o=>{
+        const opt=document.createElement('option');
+        opt.value=o.name; opt.textContent=o.name; directorSel.appendChild(opt);
+      });
+    }catch(e){
+      activeDirectors=[];
+    }finally{
+      if(!directorsCard.classList.contains('hidden')) buildDirectorsForm();
+
+      const optOther=document.createElement('option');
+      optOther.value='__other__'; optOther.textContent='Other (employee)';
+      directorSel.appendChild(optOther);
+      directorWrap.classList.remove('hidden');
+      directorSel.value='';
+      toggleOtherContact();
+    }
+  }
+
+  // Contact toggle
+  function toggleOtherContact(){
+    const isOther = directorSel.value === '__other__';
+    otherContactWrap.classList.toggle('hidden', !isOther);
+    if(isOther){
+      otherContactName.setAttribute('required','required');
+      otherContactTitle.setAttribute('required','required');
+    }else{
+      otherContactName.removeAttribute('required');
+      otherContactTitle.removeAttribute('required');
+    }
+  }
+  directorSel.addEventListener('change', toggleOtherContact);
+
+  // Working hours helpers (unchanged) ...
+  function ymdKey(y,m,d){ return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
+  function addDaysYMD(y,m,d,n){ const t=new Date(Date.UTC(y,m-1,d,12,0)); t.setUTCDate(t.getUTCDate()+n); return { y:t.getUTCFullYear(), m:t.getUTCMonth()+1, d:t.getUTCDate() }; }
+  function dow(y,m,d){ return new Date(Date.UTC(y,m-1,d,12,0)).getUTCDay(); }
+  function isWeekend(y,m,d){ const w=dow(y,m,d); return w===0||w===6; }
+  function easterYMD(year){
+    const a=year%19, b=Math.floor(year/100), c=year%100;
+    const d=Math.floor(b/4), e=b%4, f=Math.floor((b+8)/25), g=Math.floor((b-f+1)/3);
+    const h=(19*a+b-d-g+15)%30, i=Math.floor(c/4), k=c%4;
+    const l=(32+2*e+2*i-h-k)%7, m=Math.floor((a+11*h+22*l)/451);
+    const month=Math.floor((h+l-7*m+114)/31); const day=((h+l-7*m+114)%31)+1;
+    return { y:year, m:month, d:day };
+  }
+  function firstMondayIn(month,year){ let d=1; while(dow(year,month,d)!==1) d++; return {y:year,m:month,d}; }
+  function lastMondayIn(month,year){ const last=new Date(Date.UTC(year,month,0,12,0)).getUTCDate(); let d=last; while(dow(year,month,d)!==1) d--; return {y:year,m:month,d}; }
+  const bhCache=new Map();
+  function bankHolidaySet(year){
+    if(bhCache.has(year)) return bhCache.get(year);
+    const set=new Set();
+    const nyW=dow(year,1,1);
+    set.add(nyW===6?ymdKey(year,1,3):nyW===0?ymdKey(year,1,2):ymdKey(year,1,1));
+    const e=easterYMD(year); const gf=addDaysYMD(e.y,e.m,e.d,-2); const em=addDaysYMD(e.y,e.m,e.d,1);
+    set.add(ymdKey(gf.y,gf.m,gf.d)); set.add(ymdKey(em.y,em.m,em.d));
+    const mayEarly=firstMondayIn(5,year), spring=lastMondayIn(5,year), summer=lastMondayIn(8,year);
+    set.add(ymdKey(mayEarly.y,mayEarly.m,mayEarly.d));
+    set.add(ymdKey(spring.y,spring.m,spring.d));
+    set.add(ymdKey(summer.y,summer.m,summer.d));
+    const xw=dow(year,12,25), bw=dow(year,12,26);
+    set.add((xw===6||xw===0)?ymdKey(year,12,27):ymdKey(year,12,25));
+    set.add((bw===6||bw===0)?ymdKey(year,12,28):ymdKey(year,12,26));
+    return set;
+  }
+  function isXmasClosure(y,m,d){ return (m===12 && d>=24) || (m===1 && d<=1); }
+  function isBankHoliday(y,m,d){ return bankHolidaySet(y).has(ymdKey(y,m,d)); }
+  function isWorkingDay(y,m,d){ return !isWeekend(y,m,d) && !isBankHoliday(y,m,d) && !isXmasClosure(y,m,d); }
+
+  function isWithinHours(now=new Date()){
+    const h = now.toTimeString().slice(0,5);
+    const y=now.getFullYear(), m=now.getMonth()+1, d=now.getDate();
+    return isWorkingDay(y,m,d) && h>=HOURS.open && h<=HOURS.close;
+  }
+  function nextWorkingDateStr(y,m,d){
+    let t={y,m,d};
+    while(!isWorkingDay(t.y,t.m,t.d)){ t=addDaysYMD(t.y,t.m,t.d,1); }
+    return ymdKey(t.y,t.m,t.d);
+  }
+  function formatUK(str){ const d=new Date(str+'T12:00:00Z'); return d.toLocaleDateString('en-GB',{weekday:'short', day:'2-digit', month:'short', year:'numeric'}); }
+  function nextWorkingDayFromNow(){
+    const n=new Date(); const hhmm=n.toTimeString().slice(0,5);
+    let y=n.getFullYear(), m=n.getMonth()+1, d=n.getDate();
+    if(isWorkingDay(y,m,d)){
+      if(hhmm < HOURS.open) return ymdKey(y,m,d);
+      if(hhmm > HOURS.close){ const t=addDaysYMD(y,m,d,1); return nextWorkingDateStr(t.y,t.m,t.d); }
+      return ymdKey(y,m,d);
+    }
+    const t=addDaysYMD(y,m,d,1); return nextWorkingDateStr(t.y,t.m,t.d);
+  }
+
+  function updateOpenState(){
+    if(isWithinHours()){
+      openState.innerHTML=`<strong>We’re open now.</strong> Choose <em>ASAP</em> for a call today.`;
+    }else{
+      const nxt=nextWorkingDayFromNow();
+      openState.innerHTML=`<strong>We’re currently closed.</strong> If you choose <em>ASAP</em>, we’ll call on <u>${formatUK(nxt)}</u> after ${HOURS.open}.`;
+    }
+  }
+  function toggleCbWrap(){ cbWhenWrap.classList.toggle('hidden', !cbPrefPick.checked); }
+  cbPrefAsap.addEventListener('change', toggleCbWrap);
+  cbPrefPick.addEventListener('change', toggleCbWrap);
+  toggleCbWrap(); updateOpenState(); setInterval(updateOpenState, 60000);
+
+  // Navigation
+  $('#next1').onclick=function(){
+    let err="";
+    if(!companyName.value||!companyNumber.value) err+="Select a company. ";
+    if((companyStatus.value||'').toLowerCase()!=="active") err+="Company must be Active. ";
+    if(!/^[+\s\d]{10,16}$/.test(contactNumber.value.replace(/[^+\d]/g,''))) err+="Enter valid contact number. ";
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) err+="Enter valid email. ";
+    if(cbPrefPick.checked && !cbDT.value) err+="Pick a date & time. ";
+
+    if(directorSel.value === '__other__'){
+      if(!otherContactName.value.trim() || !otherContactTitle.value.trim()){
+        err+="Enter contact name and job title. ";
+      }
+    }
+    const box=$('#step1error'); box.textContent=err;
+    if(err){ step1.classList.add('shake'); setTimeout(()=>step1.classList.remove('shake'),420); return; }
+    goto('step1','step2',2);
+  };
+  $('#back2').onclick=()=> goto('step2','step1',1);
+  $('#fundingType').addEventListener('change', configureStepperForFundingType);
+
+  $('#next2').onclick=function(){
+    let err=""; if(!$('#fundingType').value) err+="Select a funding type.";
+    const box=$('#step2error'); box.textContent=err;
+    if(err){ step2.classList.add('shake'); setTimeout(()=>step2.classList.remove('shake'),420); return; }
+    const ft=$('#fundingType').value;
+    configureStepperForFundingType(ft);
+    buildQuestions(ft);
+    goto('step2','step3',3);
+  };
+  $('#back3').onclick=()=> goto('step3','step2',2);
+
+  // Field builders
+  function q(label,name,extra=''){ return `<label>${label}</label><input name="${name}" ${extra}>`; }
+  function s(label,name,opts){ return `<label>${label}</label><select name="${name}" data-label="${label}"><option value="">-- Select --</option>${opts.map(o=>`<option>${o}</option>`).join('')}</select>`; }
+
+  // Number formatting etc (unchanged) ...
+  function attachNumberFormatting(root){
+    $$('#questions input[data-num="true"]',root).forEach(inp=>{
+      if (inp.name === 'deposit_value') return; // special
+      const cleanNum=v=>String(v).replace(/[^\d,\.\-+]/g,'');
+      inp.value=cleanNum(inp.value);
+      inp.addEventListener('input',()=> inp.value=cleanNum(inp.value));
+      inp.addEventListener('blur',()=>{ const raw=cleanNumberForCalc(inp.value); if(raw==='') return; const n=Number(raw); if(!Number.isNaN(n)) inp.value=n.toLocaleString('en-GB'); });
+      inp.addEventListener('focus',()=> inp.value=cleanNumberForCalc(inp.value));
+    });
+  }
+  function clearFormat(el){
+    if(el._onInput) el.removeEventListener('input', el._onInput);
+    if(el._onFocus) el.removeEventListener('focus', el._onFocus);
+    if(el._onBlur)  el.removeEventListener('blur',  el._onBlur);
+    el._onInput=el._onFocus=el._onBlur=null; el._format=null;
+  }
+  function setMoneyFormat(el){
+    if(el._format==='money') return;
+    clearFormat(el);
+    const onInput=()=>{ el.value=el.value.replace(/[^\d\.,\-]/g,''); };
+    const onFocus=()=>{ el.value=cleanNumberForCalc(el.value); };
+    const onBlur =()=>{ const raw=cleanNumberForCalc(el.value); if(raw==='') return; const n=Number(raw); if(!Number.isNaN(n)) el.value='£'+n.toLocaleString('en-GB'); };
+    el.addEventListener('input',onInput); el.addEventListener('focus',onFocus); el.addEventListener('blur',onBlur);
+    el._onInput=onInput; el._onFocus=onFocus; el._onBlur=onBlur; el._format='money';
+  }
+  function setPercentFormat(el){
+    if(el._format==='percent') return;
+    clearFormat(el);
+    const onInput=()=>{ el.value=el.value.replace(/[^\d\.\-]/g,''); };
+    const onFocus=()=>{ el.value=el.value.replace('%',''); };
+    const onBlur =()=>{ const raw=cleanNumberForCalc(el.value); if(raw==='') return; const n=Number(raw); if(!Number.isNaN(n)) el.value=n.toLocaleString('en-GB',{maximumFractionDigits:2})+'%'; };
+    el.addEventListener('input',onInput); el.addEventListener('focus',onFocus); el.addEventListener('blur',onBlur);
+    el._onInput=onInput; el._onFocus=onFocus; el._onBlur=onBlur; el._format='percent';
+  }
+
+  // Build dynamic questions (unchanged) ...
+  function buildQuestions(type){
+    let html = (type==="business") ? `${q('What is the purpose of this funding?*','purpose','type="text" maxlength="200" required data-label="Purpose of Funding"')}` : '';
+
+    if(type==="business"){
+      html+=`
+        ${s('Secured or Unsecured Loan?','loan_security',['Secured','Unsecured'])}
+        ${q('Annual Turnover (£)*','turnover','data-num="true" inputmode="decimal" required data-label="Annual Turnover" data-currency="GBP"')}
+        ${q('Amount Looking to Borrow (£)*','amount','data-num="true" inputmode="decimal" required data-label="Amount Looking to Borrow" data-currency="GBP"')}
+        ${q('Last financial year profit (£)','profit_last_year','data-num="true" inputmode="decimal" data-label="Last Financial Year Profit" data-currency="GBP"')}
+        ${s('Are you a homeowner?','homeowner',['Yes','No'])}
+        ${s('Does the business have any existing loans or finance?','existingFinance',['Yes','No'])}
+        <div id="monthlyWrap" class="hidden">
+          ${q('Total existing monthly repayments (£)','bl_monthly','data-num="true" inputmode="decimal" data-label="Total Existing Monthly Repayments" data-currency="GBP"')}
+          ${q('Existing loans (lender & balance)','existing_loans_detail','type="text" maxlength="220" placeholder="Optional" data-label="Existing Loans (notes)"')}
+        </div>
+        ${s('Do you take payments via a card terminal?','card_terminal',['Yes','No'])}
+        <div id="cardWrap" class="hidden">
+          ${q('Average monthly card terminal takings (£)','card_monthly_takings','data-num="true" inputmode="decimal" data-label="Average Monthly Card Takings" data-currency="GBP"')}
+        </div>
+      `;
+    }
+
+    if(type==="asset"){
+      html+=`
+        ${s('Asset Type','asset_type',['Vehicle','Plant & Machinery','IT/Technology','Office Equipment','Green Energy','Medical','Other'])}
+        <div id="assetOtherWrap" class="hidden">
+          ${q('Please describe the asset type','asset_type_other','type="text" maxlength="120" data-label="Asset Type (Other)"')}
+        </div>
+        ${q('Asset Description','asset_desc','type="text" maxlength="200" data-label="Asset Description"')}
+        ${s('New or Used?','asset_condition',['New','Used'])}
+        ${s('Finance Type','finance_type',['Hire Purchase','Lease','Refinance'])}
+        ${q('Supplier Name (optional)','supplier','type="text" maxlength="120" placeholder="Optional" data-label="Supplier Name"')}
+        ${q('Asset Cost (ex VAT) (£)*','asset_cost','data-num="true" inputmode="decimal" required data-label="Asset Cost (ex VAT)" data-currency="GBP"')}
+
+        <div id="depositSection">
+          ${s('Deposit Type','deposit_type',['VAT upfront','Percentage deposit','Money deposit'])}
+          <div id="depWrap" class="hidden">
+            ${q('Deposit Amount / Percentage','deposit_value','inputmode="decimal" data-label="Deposit Value"')}
+          </div>
+        </div>
+
+        ${q('Term (months)*','term_months','type="number" min="1" max="84" required data-label="Term (months)"')}
+      `;
+    }
+
+    if(type==="invoice"){
+      html+=`
+        ${q('Annual Turnover (£)*','inv_turnover','data-num="true" inputmode="decimal" required data-label="Average Monthly Turnover" data-currency="GBP"')}
+        ${q('Amount to Advance (£)*','advance_amount','data-num="true" inputmode="decimal" required data-label="Amount to Advance" data-currency="GBP"')}
+        ${q('Average Debtor Days','debtor_days','type="number" min="0" max="180" data-label="Average Debtor Days"')}
+        ${q('Number of Active Customers','active_customers','type="number" min="0" max="5000" data-label="Number of Active Customers"')}
+        ${s('Existing Invoice Finance?','existing_if',['Yes','No'])}
+        <div id="ifWrap" class="hidden">
+          ${q('Current Lender','current_lender','type="text" maxlength="120" data-label="Current Lender"')}
+          ${q('Current Facility Limit (£)','current_limit','data-num="true" inputmode="decimal" data-label="Current Facility Limit" data-currency="GBP"')}
+        </div>
+      `;
+    }
+
+    if(type==="tax"){
+      html+=`
+        ${s('Tax Type','tax_type',['VAT','Corporation Tax','PAYE/NIC'])}
+        ${q('Amount Due (£)*','tax_amount','data-num="true" inputmode="decimal" required data-label="Amount Due" data-currency="GBP"')}
+        ${q('Due Date*','due_date','type="date" required data-label="Due Date"')}
+        ${s('Payment Plan with HMRC?','hmrc_plan',['No','Yes'])}
+        ${q('Annual Turnover (£)*','annual_turnover','data-num="true" inputmode="decimal" required data-label="Annual Turnover" data-currency="GBP"')}
+      `;
+    }
+
+    questions.innerHTML=html;
+    attachNumberFormatting(document);
+
+    const exSel=$('[name="existingFinance"]');
+    if(exSel){ exSel.addEventListener('change',()=> $('#monthlyWrap').classList.toggle('hidden', exSel.value!=='Yes')); }
+    const ifSel=$('[name="existing_if"]');
+    if(ifSel){ ifSel.addEventListener('change',()=> $('#ifWrap').classList.toggle('hidden', ifSel.value!=='Yes')); }
+    const cardSel=$('[name="card_terminal"]');
+    if(cardSel){ cardSel.addEventListener('change',()=> $('#cardWrap').classList.toggle('hidden', cardSel.value!=='Yes')); }
+
+    // Asset "Other" toggle
+    const assetType=$('[name="asset_type"]'), assetOtherWrap=$('#assetOtherWrap');
+    if(assetType){
+      assetType.addEventListener('change',()=>{
+        const show=assetType.value==='Other';
+        assetOtherWrap.classList.toggle('hidden',!show);
+        const other=$('[name="asset_type_other"]');
+        if(other){ if(show) other.setAttribute('required','required'); else other.removeAttribute('required'); }
+      });
+    }
+
+    // Deposit behaviour
+    const depType=$('[name="deposit_type"]');
+    const depWrap=$('#depWrap');
+    const depInput=$('[name="deposit_value"]');
+    function setDepositUI(){
+      const v=depType ? depType.value : '';
+      const showBox = (v==='Percentage deposit' || v==='Money deposit');
+      depWrap && depWrap.classList.toggle('hidden', !showBox);
+      if(!showBox){
+        if(depInput){
+          depInput.value=''; depInput.removeAttribute('data-currency'); depInput.removeAttribute('data-percent');
+          clearFormat(depInput); depInput.placeholder=''; depInput.setAttribute('data-label','Deposit Value');
+        }
+        return;
+      }
+      if(v==='Percentage deposit'){
+        depInput && (depInput.placeholder='e.g. 10');
+        depInput && depInput.setAttribute('data-label','Deposit %');
+        depInput && depInput.removeAttribute('data-currency');
+        depInput && depInput.setAttribute('data-percent','true');
+        depInput && setPercentFormat(depInput);
+      }else{
+        depInput && (depInput.placeholder='e.g. 5,000');
+        depInput && depInput.setAttribute('data-label','Deposit (£)');
+        depInput && depInput.setAttribute('data-currency','GBP');
+        depInput && depInput.removeAttribute('data-percent');
+        depInput && setMoneyFormat(depInput);
+      }
+    }
+    if(depType){
+      depType.addEventListener('change', setDepositUI);
+      setDepositUI();
+    }
+
+    // Hide deposit when Finance Type = Lease
+    const financeType=$('[name="finance_type"]');
+    const depositSection=$('#depositSection');
+    function resetDepositFields(){
+      if(depType) depType.value='';
+      if(depInput){
+        depInput.value=''; clearFormat(depInput); depInput.placeholder='';
+        depInput.removeAttribute('data-currency'); depInput.removeAttribute('data-percent');
+      }
+      if(depWrap) depWrap.classList.add('hidden');
+    }
+    function toggleDepositForFinanceType(){
+      const isLease = financeType && financeType.value === 'Lease';
+      if(depositSection) depositSection.classList.toggle('hidden', isLease);
+      if(isLease){ resetDepositFields(); } else { if(typeof setDepositUI==='function') setDepositUI(); }
+    }
+    if(financeType){
+      financeType.addEventListener('change', toggleDepositForFinanceType);
+      toggleDepositForFinanceType();
+    }
+  }
+
+  // After Details → go straight to Directors (no Outcome step)
+  $('#detailsContinue').addEventListener('click', ()=>{
+    const requireds = $$('#step3 input[required], #step3 select[required], #step3 textarea[required]');
+    for(const el of requireds){
+      if(el.hasAttribute('data-num')){
+        const n=getNumericValue(el);
+        if(n===null){
+          $('#step3error').textContent='Please enter valid numbers (you can use commas).';
+          el.focus(); step3.classList.add('shake'); setTimeout(()=>step3.classList.remove('shake'),420);
+          return;
+        }
+      } else if(!el.value){
+        $('#step3error').textContent='Please complete all required fields.';
+        el.focus(); step3.classList.add('shake'); setTimeout(()=>step3.classList.remove('shake'),420);
+        return;
+      }
+    }
+
+    // turnover gate (same as before)
+    const FT=$('#fundingType').value;
+    let checkEl=null, val=null;
+    if(FT==='business'){ checkEl=$('[name="turnover"]'); val=checkEl?getNumericValue(checkEl):null; }
+    else if(FT==='tax'){ checkEl=$('[name="annual_turnover"]'); val=checkEl?getNumericValue(checkEl):null; }
+    else if(FT==='invoice'){ checkEl=$('[name="inv_turnover"]'); val=checkEl?getNumericValue(checkEl):null; }
+
+    if(checkEl && (val===null || val<=50000)){
+      $('#step3error').textContent='Annual Turnover must exceed £50,000.';
+      checkEl.focus(); step3.classList.add('shake'); setTimeout(()=>step3.classList.remove('shake'),420);
+      return;
+    }
+
+    $('#step3error').textContent='';
+    buildDirectorsForm(true); // true = coming from details, show banner
+    goto('step3','directorsCard',4);
+  });
+
+  // Directors banner helper (uses same eligibility logic as before)
+  function evaluateQualification(){
+    const type=$('#fundingType').value;
+    if(type==='business'){
+      const security = ($('[name="loan_security"]')?.value || '').toLowerCase();
+      const amount   = getNumericValue('[name="amount"]')   || 0;
+      const turnover = getNumericValue('[name="turnover"]') || 0;
+      const eligible60 = (security!=='secured' && amount>0 && turnover>0 && amount <= (turnover*0.60));
+      let qualifies=true; if(security!=='secured'){ qualifies=eligible60; }
+      return { qualifies, eligible60, security, amount, turnover };
+    }
+    return { qualifies:true, eligible60:false, security:null, amount:0, turnover:0 };
+  }
+
+  // ---------- Directors UI (UPDATED: vertical, chevron, info tips) ----------
+  function buildDirectorsForm(fromDetails=false){
+    dirError.textContent = '';
+    dirList.innerHTML = '';
+    dirBanner.innerHTML = '';
+
+    // Optional banner at top
+    const type=$('#fundingType').value;
+    const { eligible60, amount } = evaluateQualification();
+    if(fromDetails){
+      if(type==='business' && eligible60){
+        dirBanner.innerHTML = `
+          <div class="success-hero" role="img" aria-label="Eligible">
+            <div class="tick" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M20 6L9 17l-5-5" stroke="var(--cbf-ok)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3 style="margin:0">Great news</h3>
+          </div>
+          <p><strong>${companyName.value || 'Your company'}</strong> looks eligible for approximately <strong>£${fmtGBP(amount)}</strong> (subject to underwriting).</p>
+          <p class="success-note">Next step: please complete directors’ details below. If you don’t have them handy, you can <strong>Skip and Submit</strong> — we’ll still receive your enquiry.</p>
+        `;
+        fireConfetti(120);
+      }else{
+        dirBanner.innerHTML = `
+          <div class="banner"><strong>Next step:</strong> please complete directors’ details below. If you don’t have them handy, you can <strong>Skip and Submit</strong> — we’ll still receive your enquiry.</div>
+        `;
+      }
+    }
+
+    // Up to 5 names from CH; if none, show two placeholders
+    const names = (activeDirectors && activeDirectors.length)
+      ? activeDirectors.slice(0, 5)
+      : ['Director 1', 'Director 2'];
+
+    // helper to render info icon + tooltip
+    const info = (text) => `
+      <span class="info-icon" role="button" tabindex="0" aria-label="More info" data-tip="${text}">i</span>
+    `;
+
+    names.forEach((name, idx) => {
+      const html = `
+        <div class="dir-card collapsed" data-dir="${idx}" aria-expanded="false">
+          <div class="dir-head" role="button" tabindex="0" aria-controls="dir_${idx}_body">
+            <div class="name">
+              <svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M8 5l8 7-8 7" stroke="#5f8b94" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              ${name}
+            </div>
+            <label style="display:flex;gap:6px;align-items:center;cursor:pointer;">
+              <input type="checkbox" class="dir-include" data-idx="${idx}">
+              Include
+            </label>
+          </div>
+          <div class="dir-body disabled" id="dir_${idx}_body">
+            <label>Home address (line 1)</label>
+            <div class="fieldline" style="position:relative;">
+              <input type="text" class="dir-addr1" data-vid="a1" data-idx="${idx}"
+                     placeholder="Start typing address or business name (UK)" data-places="true" autocomplete="off">
+              ${info('First line of the director’s current home address. Start typing to search.')}
+              <div class="tip" role="dialog" aria-live="polite"></div>
+            </div>
+
+            <label>Home address (line 2) <span class="muted">(optional)</span></label>
+            <div class="fieldline" style="position:relative;">
+              <input type="text" class="dir-addr2" data-vid="a2" data-idx="${idx}" placeholder="Flat, building, etc.">
+              ${info('Additional address info, e.g. flat, building or estate (optional).')}
+              <div class="tip" role="dialog" aria-live="polite"></div>
+            </div>
+
+            <div class="row3">
+              <div>
+                <label>Town/City</label>
+                <div class="fieldline" style="position:relative;">
+                  <input type="text" class="dir-city" data-vid="city" data-idx="${idx}" placeholder="e.g. London">
+                  ${info('Town or city for the director’s current residential address.')}
+                  <div class="tip" role="dialog" aria-live="polite"></div>
+                </div>
+              </div>
+              <div>
+                <label>Postcode</label>
+                <div class="fieldline" style="position:relative;">
+                  <input type="text" class="dir-postcode" data-vid="pc" data-idx="${idx}" placeholder="e.g. SW1A 1AA">
+                  ${info('Full UK postcode for the residential address (no PO Box).')}
+                  <div class="tip" role="dialog" aria-live="polite"></div>
+                </div>
+              </div>
+              <div>
+                <label>Date of birth <span class="muted">(DD/MM/YYYY)</span></label>
+                <div class="fieldline" style="position:relative;">
+                  <input type="text" class="dir-dob" data-vid="dob" data-idx="${idx}" placeholder="DD/MM/YYYY" inputmode="numeric" autocomplete="off">
+                  ${info('Used for identity and credit checks. Directors must be 18 or over.')}
+                  <div class="tip" role="dialog" aria-live="polite"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      const wrap = document.createElement('div');
+      wrap.innerHTML = html;
+      dirList.appendChild(wrap.firstElementChild);
+    });
+
+    // Expand/Collapse helpers
+    function setExpanded(card, expanded){
+      const body = card.querySelector('.dir-body');
+      const include = card.querySelector('.dir-include');
+      if(expanded){
+        card.classList.remove('collapsed'); card.classList.add('expanded');
+        card.setAttribute('aria-expanded','true');
+        if(include && include.checked){ body.classList.remove('disabled'); }
+      }else{
+        card.classList.remove('expanded'); card.classList.add('collapsed');
+        card.setAttribute('aria-expanded','false');
+        body.classList.add('disabled');
+      }
+    }
+
+    // Include checkbox toggles enabled state and expansion
+    $$('.dir-include', dirList).forEach(chk => {
+      chk.addEventListener('change', () => {
+        const card = chk.closest('.dir-card');
+        const body = card.querySelector('.dir-body');
+        if(chk.checked){
+          body.classList.remove('disabled');
+          setExpanded(card, true);
+          const first = body.querySelector('input'); first && first.focus();
+        }else{
+          body.classList.add('disabled');
+          setExpanded(card, false);
+        }
+      });
+    });
+
+    // Header click toggles collapse only if included
+    $$('.dir-head', dirList).forEach(head=>{
+      head.addEventListener('click', ()=>{
+        const card = head.closest('.dir-card');
+        const include = card.querySelector('.dir-include');
+        if(!include.checked) return;
+        const expanded = card.classList.contains('expanded');
+        setExpanded(card, !expanded);
+      });
+      head.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter' || e.key===' '){
+          e.preventDefault();
+          const card = head.closest('.dir-card');
+          const include = card.querySelector('.dir-include');
+          if(!include.checked) return;
+          const expanded = card.classList.contains('expanded');
+          setExpanded(card, !expanded);
+        }
+      });
+    });
+
+    // Info tooltip behaviour (click to toggle; click outside to close)
+    function hideAllTips(){ $$('.tip', dirList).forEach(t=>t.classList.remove('visible')); }
+    dirList.addEventListener('click', (e)=>{
+      const btn = e.target.closest('.info-icon');
+      if(!btn) return;
+      const holder = btn.parentElement;
+      const tip = holder.querySelector('.tip');
+      if(!tip) return;
+      if(!tip.classList.contains('visible')) hideAllTips();
+      tip.textContent = btn.getAttribute('data-tip') || '';
+      // position tip
+      tip.style.top = 'calc(100% + 6px)';
+      tip.style.left = '0';
+      tip.classList.toggle('visible');
+      e.stopPropagation();
+    });
+    document.addEventListener('click', (e)=>{
+      if(!dirList.contains(e.target)) hideAllTips();
+    });
+
+    // Attach Places to each "Home address (line 1)"
+    function attachPlacesToDirAddr1(inp){
+      const ac = places.create(inp);
+      if(!ac) return;
+      ac.addListener('place_changed', () => {
+        const place = ac.getPlace();
+        if(!place || !place.address_components) return;
+        const split = places.split(place.address_components);
+
+        inp.value = split.street1 || inp.value;
+
+        const body = inp.closest('.dir-body');
+        if(body){
+          const addr2 = body.querySelector('.dir-addr2');
+          const city  = body.querySelector('.dir-city');
+          const pc    = body.querySelector('.dir-postcode');
+
+          if(addr2) addr2.value = split.street2 || addr2.value;
+          if(city)  city.value  = split.city    || city.value;
+          if(pc)    pc.value    = split.postcode|| pc.value;
+
+          // Persist for submission
+          body.dataset.addrLine1 = split.street1 || '';
+          body.dataset.addrLine2 = split.street2 || '';
+          body.dataset.addrLine3 = split.street3 || '';
+          body.dataset.addrLine4 = '';
+          body.dataset.addrLine5 = '';
+        }
+      });
+      places.autocompletes.push(ac);
+    }
+
+    $$('.dir-addr1', dirList).forEach(attachPlacesToDirAddr1);
+
+    attachDOBHandlers();
+  }
+  // ---------- DOB helpers ----------
+  function toUK(dd,mm,yyyy){ return `${String(dd).padStart(2,'0')}/${String(mm).padStart(2,'0')}/${yyyy}`; }
+  function parseDOB(str){
+    if(!str) return null;
+    const s = String(str).trim();
+    let d,m,y;
+    if(/^\d{2}\/\d{2}\/\d{4}$/.test(s)){ [d,m,y] = s.split('/').map(Number); }
+    else if(/^\d{4}-\d{2}-\d{2}$/.test(s)){ [y,m,d] = s.split('-').map(Number); }
+    else return null;
+    if(m<1||m>12||d<1||d>31) return null;
+    const dt = new Date(Date.UTC(y,m-1,d,12,0,0));
+    if(dt.getUTCFullYear()!==y || (dt.getUTCMonth()+1)!==m || dt.getUTCDate()!==d) return null;
+    return dt;
+  }
+  function formatDOBUK(dt){ return toUK(dt.getUTCDate(), dt.getUTCMonth()+1, dt.getUTCFullYear()); }
+  function attachDOBHandlers(){
+    $$('#dirList .dir-dob').forEach(inp=>{
+      inp.setAttribute('placeholder','DD/MM/YYYY');
+      inp.addEventListener('input', ()=>{
+        let v = inp.value.replace(/[^\d/]/g,'').slice(0,10);
+        v = v.replace(/^(\d{2})(\d)/,'$1/$2').replace(/^(\d{2}\/\d{2})(\d)/,'$1/$2');
+        inp.value = v;
+      });
+      inp.addEventListener('blur', ()=>{
+        const dt = parseDOB(inp.value);
+        if(dt) inp.value = formatDOBUK(dt);
+      });
+    });
+  }
+  function ageFromDOB(dob){
+    const now = new Date();
+    let age = now.getUTCFullYear() - dob.getUTCFullYear();
+    const m = now.getUTCMonth() - dob.getUTCMonth();
+    if (m < 0 || (m===0 && now.getUTCDate() < dob.getUTCDate())) age--;
+    return age;
+  }
+
+  // ---------- Submit directors ----------
+  $('#submitDirectors').addEventListener('click', ()=>{
+    dirError.textContent = '';
+    const items = $$('#dirList .dir-card');
+    let anyIncluded = false;
+    const collected = []; // {name,dob,pc,city,lines[5]}
+
+    for(const card of items){
+      const include = card.querySelector('.dir-include').checked;
+      const name = (card.querySelector('.name')?.textContent || '').replace(/^\s*[^A-Za-z0-9]*\s*/, '').trim();
+      if(!include) continue;
+      anyIncluded = true;
+
+      const body   = card.querySelector('.dir-body');
+      const dobStr = card.querySelector('.dir-dob').value.trim();
+      const addr1I = card.querySelector('.dir-addr1').value.trim();
+      const addr2I = card.querySelector('.dir-addr2').value.trim();
+      const cityI  = card.querySelector('.dir-city').value.trim();
+      const pcI    = card.querySelector('.dir-postcode').value.trim();
+
+      if(!dobStr || !addr1I || !cityI || !pcI){
+        dirError.textContent='Please complete DOB, address line 1, town/city and postcode for each included director.';
+        return;
+      }
+
+      const dob = parseDOB(dobStr);
+      if(!dob){ dirError.textContent='Please enter a valid date of birth (DD/MM/YYYY).'; return; }
+      const age = ageFromDOB(dob);
+      if(age < 18){ dirError.textContent='Directors must be at least 18 years old.'; return; }
+      if(age > 100){ dirError.textContent='Please check DOB – directors over 100 are unlikely.'; return; }
+
+      // Use dataset (from Places) if present, else typed values
+      const ln1 = body?.dataset.addrLine1 || addr1I || '';
+      const ln2 = body?.dataset.addrLine2 || addr2I || '';
+      const ln3 = body?.dataset.addrLine3 || '';
+      const ln4 = body?.dataset.addrLine4 || '';
+      const ln5 = body?.dataset.addrLine5 || '';
+
+      collected.push({
+        name,
+        dob: formatDOBUK(dob),
+        pc: pcI,
+        city: cityI,
+        lines: [ln1, ln2, ln3, ln4, ln5]
+      });
+    }
+
+    if(!anyIncluded){
+      dirError.textContent='Select at least one director to include.';
+      return;
+    }
+
+    // Map to CD 1..5
+    for(let i=1;i<=5;i++){
+      const d = collected[i-1];
+      const put = (id,val)=>{ const el=document.getElementById(id); if(el) el.value = val || ''; };
+
+      put('cd_txtDirectorName'+i,     d?.name || '');
+      put('cd_txtDirectorDoB'+i,      d?.dob  || '');
+      put('cd_txtDirectorPostCode'+i, d?.pc   || '');
+      put('cd_txtDirectorTownCity'+i, d?.city || '');
+
+      put('cd_txtDirectorHomeAddress1_'+i, d ? (d.lines[0] || '') : '');
+      put('cd_txtDirectorHomeAddress2_'+i, d ? (d.lines[1] || '') : '');
+      put('cd_txtDirectorHomeAddress3_'+i, d ? (d.lines[2] || '') : '');
+      put('cd_txtDirectorHomeAddress4_'+i, d ? (d.lines[3] || '') : '');
+      put('cd_txtDirectorHomeAddress5_'+i, d ? (d.lines[4] || '') : '');
+    }
+
+    submitToClick();
+    goto('directorsCard','completeCard',TOTAL_STEPS);
+  });
+
+  // Skip directors -> blank all director fields
+  document.getElementById('skipDirectors')?.addEventListener('click', ()=>{
+    for(let i=1;i<=5;i++){
+      [
+        'cd_txtDirectorName'+i,
+        'cd_txtDirectorDoB'+i,
+        'cd_txtDirectorPostCode'+i,
+        'cd_txtDirectorTownCity'+i,
+        'cd_txtDirectorHomeAddress1_'+i,
+        'cd_txtDirectorHomeAddress2_'+i,
+        'cd_txtDirectorHomeAddress3_'+i,
+        'cd_txtDirectorHomeAddress4_'+i,
+        'cd_txtDirectorHomeAddress5_'+i
+      ].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    }
+    submitToClick();
+    goto('directorsCard','completeCard',TOTAL_STEPS);
+  });
+
+  document.getElementById('backToDetails')?.addEventListener('click', ()=> goto('directorsCard','step3',TOTAL_STEPS-1));
+
+  // ---------- CD mapping + submit (unchanged) ----------
+  function setVal(id, v){ const el=document.getElementById(id); if(el) el.value = (v==null ? '' : String(v)); }
+
+  function toISOFromLocalDatetimeLocal(val){
+    if(!val) return '';
+    const d = new Date(val);
+    if(Number.isNaN(d.valueOf())) return val;
+    return d.toISOString();
+  }
+
+  // Split Trading Address (Places or best-effort manual)
+  function splitTradingAddressRaw(raw){
+    const parts = String(raw).split(',').map(s=>s.trim()).filter(Boolean);
+    const out = { street1:'', street2:'', street3:'', city:'', county:'', country:'United Kingdom', postcode:'' };
+    if(!parts.length) return out;
+    const pcRe = /^[A-Z]{1,2}\d[A-Z0-9]?\s*\d[A-Z]{2}$/i;
+    if(parts.length && pcRe.test(parts[parts.length-1])) out.postcode = parts.pop();
+    if(parts.length) out.city = parts.pop();
+    ifparts: if(parts.length){ out.county = parts.pop(); }
+    out.street1 = parts.shift() || '';
+    out.street2 = parts.shift() || '';
+    out.street3 = parts.shift() || '';
+    return out;
+  }
+  function fillTradingAddressCD(){
+    const input = document.getElementById('tradingAddress');
+    if(!input){
+      setVal('cd_txtTradingAddStreet1',''); setVal('cd_txtTradingAddStreet2',''); setVal('cd_txtTradingAddStreet3','');
+      setVal('cd_txtTradingAddCity',''); setVal('cd_txtTradingAddCounty',''); setVal('cd_txtTradingAddCountry',''); setVal('cd_txtTradingAddPostcode','');
+      return;
+    }
+    const split = (input._cbfSplit) ? input._cbfSplit : splitTradingAddressRaw(input.value || '');
+    setVal('cd_txtTradingAddStreet1',  split.street1 || '');
+    setVal('cd_txtTradingAddStreet2',  split.street2 || '');
+    setVal('cd_txtTradingAddStreet3',  split.street3 || '');
+    setVal('cd_txtTradingAddCity',     split.city    || '');
+    setVal('cd_txtTradingAddCounty',   split.county  || '');
+    setVal('cd_txtTradingAddCountry',  split.country || '');
+    setVal('cd_txtTradingAddPostcode', split.postcode|| '');
+  }
+  function fillCdHidden(){
+    // Company
+    setVal('cd_txtCompanyName', companyName.value);
+    setVal('cd_txtCompanyRegNum', companyNumber.value);
+    setVal('cd_txtStatus', companyStatus.value);
+    setVal('cd_dtIncorporationDate', $('#chIncorp')?.textContent || '');
+    setVal('cd_txtSICCode',          $('#chSIC')?.textContent || '');
+    setVal('cd_txtCompanyType',      $('#chType')?.textContent || '');
+
+    // Contact
+    if(directorSel.value === '__other__'){
+      setVal('cd_txtContactName', otherContactName.value.trim());
+      setVal('cd_txtContactJobTitle', otherContactTitle.value.trim());
+    }else{
+      setVal('cd_txtContactName', directorSel.value || '');
+      setVal('cd_txtContactJobTitle', '');
+    }
+    setVal('cd_txtContactNumber', contactNumber.value);
+    setVal('cd_txtContactEmailAddress', email.value);
+
+    // Trading Address (split)
+    fillTradingAddressCD();
+
+    // Misc
+    setVal('cd_urlCompanyWebsite', $('#website').value);
+    setVal('cd_intNumOfEmployees', $('#employees').value);
+    setVal('cd_txtReferredBy',     $('#referral').value);
+
+    if(document.getElementById('cbPrefPick').checked){
+      setVal('cd_dtCallBackDateTime', toISOFromLocalDatetimeLocal($('#cbDT').value));
+    }else{
+      const nxt = nextWorkingDayFromNow();
+      setVal('cd_dtCallBackDateTime', `${nxt}T${HOURS.open}:00`);
+    }
+
+    // Funding
+    const ft = $('#fundingType').value;
+    const labels = { business:'Business Loan', asset:'Asset Finance', invoice:'Invoice Finance', tax:'VAT & Tax Funding' };
+    setVal('cd_txtLeadCategory', labels[ft] || ft || '');
+
+    // Topic
+    setVal('cd_txtTopic', $('[name="purpose"]')?.value || $('[name="asset_desc"]')?.value || '');
+
+    // Business Loan
+    setVal('cd_txtIsthisLoanSecuredorUnsecured', $('[name="loan_security"]')?.value || '');
+    setVal('cd_decAnnualTurnover',
+      $('[name="turnover"]')?.value ||
+      $('[name="annual_turnover"]')?.value ||
+      ''
+    );
+
+    const amt =
+      $('[name="amount"]')?.value ||
+      $('[name="advance_amount"]')?.value ||
+      $('[name="tax_amount"]')?.value ||
+      $('[name="asset_cost"]')?.value || '';
+    setVal('cd_decFinanceAmount', amt);
+
+    setVal('cd_decLastFinancialYearProfit', $('[name="profit_last_year"]')?.value || '');
+    setVal('cd_txtHomeOwner',               $('[name="homeowner"]')?.value || '');
+
+    const exF = $('[name="existingFinance"]')?.value || '';
+    setVal('cd_txtAnyExistingLoansorFinance', exF);
+    setVal('cd_decMonthlyBusinessLoanRepayments', exF==='Yes' ? ($('[name="bl_monthly"]')?.value || '') : '');
+
+    const card = $('[name="card_terminal"]')?.value || '';
+    setVal('cd_txtPaymentsTakenViaCardTerminal', card);
+    setVal('cd_decMonthlyCardTerminalIncome',    card==='Yes' ? ($('[name="card_monthly_takings"]')?.value || '') : '');
+
+    // Asset
+    setVal('cd_txtAssetType',                $('[name="asset_type"]')?.value || '');
+    setVal('cd_txtOtherAssetType',           $('[name="asset_type_other"]')?.value || '');
+    setVal('cd_txtNewOrUsed',                $('[name="asset_condition"]')?.value || '');
+    setVal('cd_txtAssetFinance_FinanceType', $('[name="finance_type"]')?.value || '');
+    setVal('cd_txtSupplierName',             $('[name="supplier"]')?.value || '');
+    setVal('cd_decAssetCost',                $('[name="asset_cost"]')?.value || '');
+    setVal('cd_decDeposit', (function(){
+      const depType = $('[name="deposit_type"]')?.value || '';
+      const depVal  = $('[name="deposit_value"]')?.value || '';
+      if(depType==='VAT upfront') return 'VAT upfront';
+      return depVal || '';
+    })());
+    setVal('cd_intTerm', $('[name="term_months"]')?.value || '');
+
+    // Invoice
+    setVal('cd_decAverageMonthlyTurnover',  $('[name="inv_turnover"]')?.value || '');
+    setVal('cd_intAverageDebtorDays',       $('[name="debtor_days"]')?.value || '');
+    setVal('cd_intNumberofActiveCustomers', $('[name="active_customers"]')?.value || '');
+    const exIF = $('[name="existing_if"]')?.value || '';
+    setVal('cd_txtCurrentInvoiceFinance', exIF);
+    setVal('cd_txtCurrentLender',        exIF==='Yes' ? ($('[name="current_lender"]')?.value || '') : '');
+    setVal('cd_decCurrentFacilityLimit', exIF==='Yes' ? ($('[name="current_limit"]')?.value  || '') : '');
+
+    // Tax
+    setVal('cd_txtTaxType',             $('[name="tax_type"]')?.value || '');
+    setVal('cd_dtDueDate',              $('[name="due_date"]')?.value || '');
+    setVal('cd_txtPaymentPlanwithHMRC', $('[name="hmrc_plan"]')?.value || '');
+
+    // URL
+    setVal('cd_txtClearURL', window.location.href || '');
+  }
+
+  function submitToClick(){
+    try{
+      fillCdHidden();
+      document.getElementById('cdForm').submit();
+    }catch(e){
+      console.error('CD submit failed', e);
+    }
+  }
+
+  // Safety: initial progress
+  setProgress(1);
+
+  // ---------- Google Maps loader callback ----------
+  window.cbfInitPlaces = function(){
+    if(places.apiReady) return;
+    places.apiReady = true;
+
+    // Trading Address — attach Places and persist split for CD mapping
+    (function(){
+      const trading = document.getElementById('tradingAddress');
+      if(!trading || !window.google || !google.maps || !google.maps.places) return;
+      const ac = places.create(trading);
+      if(!ac) return;
+
+      ac.addListener('place_changed', ()=>{
+        const p = ac.getPlace();
+        if(p && p.address_components){
+          const split = places.split(p.address_components);
+          trading.value = p.formatted_address || trading.value;
+          trading._cbfSplit = split;
+        }
+      });
+      places.autocompletes.push(ac);
+    })();
+
+    // Directors' addr1 fields (if step already visible)
+    if(!directorsCard.classList.contains('hidden')){
+      $$('.dir-addr1').forEach(n=>{
+        if(n._cbfPlacesAttached) return;
+        n._cbfPlacesAttached = true;
+        const ac = places.create(n);
+        if(!ac) return;
+        ac.addListener('place_changed', ()=>{
+          const p = ac.getPlace();
+          if(!p || !p.address_components) return;
+          const split = places.split(p.address_components);
+
+          n.value = split.street1 || n.value;
+
+          const body = n.closest('.dir-body');
+          if(body){
+            const addr2 = body.querySelector('.dir-addr2');
+            const city  = body.querySelector('.dir-city');
+            const pc    = body.querySelector('.dir-postcode');
+            if(addr2) addr2.value = split.street2 || addr2.value;
+            if(city)  city.value  = split.city    || city.value;
+            if(pc)    pc.value    = split.postcode|| pc.value;
+
+            body.dataset.addrLine1 = split.street1 || '';
+            body.dataset.addrLine2 = split.street2 || '';
+            body.dataset.addrLine3 = split.street3 || '';
+            body.dataset.addrLine4 = '';
+            body.dataset.addrLine5 = '';
+          }
+        });
+        places.autocompletes.push(ac);
+      });
+    }
+  };
+
+})();</script>
+
+<!-- Google Places JS (async) -->
+<script
+  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBvsgEOYVSEcUDky81bF5d_jaUXT07igx8&libraries=places&loading=async&callback=cbfInitPlaces"
+  async defer></script>
+</body>
+</html>
