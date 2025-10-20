@@ -59,6 +59,12 @@
     /* Form basics */
     #cbf-fe label { display:block; margin: 13px 0 5px; font-weight: 700; color:#122; }
     #cbf-fe .fieldline{ display:flex; align-items:center; gap:8px; }
+    #cbf-fe .input-with-info{ display:flex; align-items:center; gap:8px; position:relative; }
+    #cbf-fe .input-with-info .info-icon{ margin:0; }
+    #cbf-fe .input-with-info > input,
+    #cbf-fe .input-with-info > select,
+    #cbf-fe .input-with-info > textarea{ flex:1; }
+    #cbf-fe .input-with-info .tip{ top:calc(100% + 6px); left:0; min-width:220px; max-width:min(340px, 85vw); }
     #cbf-fe input, #cbf-fe select, #cbf-fe textarea {
       width:100%; padding:12px 12px; margin-bottom:8px; font-size:15px; border-radius:12px;
       border:1px solid #cfe7ec; background:#fff; color:#111; outline:none;
@@ -181,6 +187,9 @@
       #cbf-fe button, #cbf-fe button.secondary, #cbf-fe button.ghost{ width:100%; margin:8px 0 0 0; padding:14px 16px; font-size:16px; }
       #cbf-fe .toggle{ gap:10px; }
       #cbf-fe .toggle .pill{ padding:10px 14px; }
+      #cbf-fe .input-with-info{ align-items:flex-start; }
+      #cbf-fe .input-with-info .info-icon{ margin-top:6px; }
+      #cbf-fe .input-with-info .tip{ max-width:calc(100vw - 48px); }
       #cbf-fe .summary .kv{ flex-direction:column; gap:4px; }
       #cbf-fe .summary .kv b{ min-width:0; }
       #cbf-fe .dir-head{ flex-direction:row; align-items:center; gap:8px; }
@@ -218,7 +227,11 @@
           <div class="banner"><strong>Sole Traders:</strong> please call the office on <b>01277 239943</b> so we can discuss your enquiry.</div>
 
           <label for="coSearch">Company Name</label>
-          <input id="coSearch" type="text" autocomplete="off" placeholder="Start typing..." required>
+          <div class="input-with-info">
+            <button type="button" class="info-icon" aria-label="Why we ask for your company name" data-tip="Search for your registered business so we can pull the right record from Companies House and speed up your application.">i</button>
+            <input id="coSearch" type="text" autocomplete="off" placeholder="Start typing..." required>
+            <div class="tip" role="tooltip" aria-live="polite" aria-hidden="true"></div>
+          </div>
           <div id="coResults" style="position:relative"></div>
           <input type="hidden" id="companyName">
           <input type="hidden" id="companyNumber">
@@ -254,22 +267,46 @@
           </div>
 
           <label for="contactNumber">Contact Number</label>
-          <input id="contactNumber" type="tel" maxlength="16" placeholder="07123 456789" required>
+          <div class="input-with-info">
+            <button type="button" class="info-icon" aria-label="Why we ask for your phone number" data-tip="We’ll call this number with any questions and to talk through funding options.">i</button>
+            <input id="contactNumber" type="tel" maxlength="16" placeholder="07123 456789" required>
+            <div class="tip" role="tooltip" aria-live="polite" aria-hidden="true"></div>
+          </div>
 
           <label for="email">Email Address</label>
-          <input id="email" type="email" placeholder="you@yourcompany.com" required>
+          <div class="input-with-info">
+            <button type="button" class="info-icon" aria-label="Why we ask for your email" data-tip="Confirmation of your enquiry and any document requests will be sent here.">i</button>
+            <input id="email" type="email" placeholder="you@yourcompany.com" required>
+            <div class="tip" role="tooltip" aria-live="polite" aria-hidden="true"></div>
+          </div>
 
           <label for="tradingAddress">Trading Address (if different)</label>
-          <input id="tradingAddress" type="text" maxlength="200" placeholder="Start typing address or business name (UK)" data-places="true">
+          <div class="input-with-info">
+            <button type="button" class="info-icon" aria-label="Why we ask for your trading address" data-tip="Helps lenders understand where you operate. Start typing to use Google address lookup.">i</button>
+            <input id="tradingAddress" type="text" maxlength="200" placeholder="Start typing address or business name (UK)" data-places="true">
+            <div class="tip" role="tooltip" aria-live="polite" aria-hidden="true"></div>
+          </div>
 
           <label for="website">Company Website</label>
-          <input id="website" type="text" maxlength="200" placeholder="Optional">
+          <div class="input-with-info">
+            <button type="button" class="info-icon" aria-label="Why we ask for your website" data-tip="Optional, but sharing your website helps us review your products and services quickly.">i</button>
+            <input id="website" type="text" maxlength="200" placeholder="Optional">
+            <div class="tip" role="tooltip" aria-live="polite" aria-hidden="true"></div>
+          </div>
 
           <label for="employees">Number of Employees</label>
-          <input id="employees" type="number" min="1" max="100000" placeholder="Optional">
+          <div class="input-with-info">
+            <button type="button" class="info-icon" aria-label="Why we ask for employee numbers" data-tip="Gives us a sense of the size of your business when we review funding routes.">i</button>
+            <input id="employees" type="number" min="1" max="100000" placeholder="Optional">
+            <div class="tip" role="tooltip" aria-live="polite" aria-hidden="true"></div>
+          </div>
 
           <label for="referral">Who referred you?</label>
-          <input id="referral" type="text" maxlength="120" placeholder="Optional">
+          <div class="input-with-info">
+            <button type="button" class="info-icon" aria-label="Why we ask who referred you" data-tip="Letting us know who introduced you helps us keep them updated and say thanks.">i</button>
+            <input id="referral" type="text" maxlength="120" placeholder="Optional">
+            <div class="tip" role="tooltip" aria-live="polite" aria-hidden="true"></div>
+          </div>
 
           <fieldset class="cb-inline" style="border:0;padding:0;margin-top:8px;">
             <legend class="legend-inline">Best time to call</legend>
@@ -297,13 +334,17 @@
         <!-- Step 2 -->
         <div id="step2" class="step-card hidden">
           <label for="fundingType">Type of Funding Required</label>
-          <select id="fundingType" required data-label="Type of Funding Required">
-            <option value="">-- Select --</option>
-            <option value="business">Business Loan</option>
-            <option value="asset">Asset Finance</option>
-            <option value="invoice">Invoice Finance</option>
-            <option value="tax">VAT &amp; Tax Funding</option>
-          </select>
+          <div class="input-with-info">
+            <button type="button" class="info-icon" aria-label="Why we ask for funding type" data-tip="Selecting the closest match helps us route your enquiry to the right specialist team.">i</button>
+            <select id="fundingType" required data-label="Type of Funding Required">
+              <option value="">-- Select --</option>
+              <option value="business">Business Loan</option>
+              <option value="asset">Asset Finance</option>
+              <option value="invoice">Invoice Finance</option>
+              <option value="tax">VAT &amp; Tax Funding</option>
+            </select>
+            <div class="tip" role="tooltip" aria-live="polite" aria-hidden="true"></div>
+          </div>
           <div class="error" id="step2error"></div>
           <div class="actions">
             <button type="button" class="secondary" id="back2">Back</button>
@@ -513,6 +554,68 @@
   const fmtNum = (v) => { const n = Number(cleanNumberForCalc(v)); return Number.isNaN(n) ? String(v||'') : n.toLocaleString('en-GB',{maximumFractionDigits:2, minimumFractionDigits:0}); };
   const getNumericValue = (el) => { const s = cleanNumberForCalc((typeof el==='string' ? $(el) : el)?.value || ''); const n = Number(s); return Number.isNaN(n) ? null : n; };
   const valOrDash = (v) => (v && String(v).trim()!=='') ? v : '—';
+
+  let openTip = null;
+  function closeTips(except=null){
+    $$('#cbf-fe .tip.visible').forEach(tip=>{
+      if(except && tip===except) return;
+      tip.classList.remove('visible');
+      tip.setAttribute('aria-hidden','true');
+      const holder = tip.parentElement;
+      const trigger = holder ? holder.querySelector('.info-icon') : null;
+      if(trigger){ trigger.setAttribute('aria-expanded','false'); }
+    });
+    if(!except){ openTip = null; }
+  }
+
+  function bindInfoTips(scope=document){
+    $$('.info-icon[data-tip]', scope).forEach(icon=>{
+      if(icon.dataset.tipBound) return;
+      icon.dataset.tipBound = '1';
+      if(!icon.hasAttribute('role')) icon.setAttribute('role','button');
+      if(!icon.hasAttribute('tabindex')) icon.setAttribute('tabindex','0');
+      icon.setAttribute('aria-expanded','false');
+      const holder = icon.closest('.input-with-info, .fieldline, .info-holder, label, div');
+      if(!holder) return;
+      const tip = holder.querySelector('.tip');
+      if(!tip) return;
+      tip.setAttribute('aria-hidden','true');
+
+      const show = ()=>{
+        closeTips(tip);
+        tip.textContent = icon.getAttribute('data-tip') || '';
+        tip.classList.add('visible');
+        tip.setAttribute('aria-hidden','false');
+        icon.setAttribute('aria-expanded','true');
+        openTip = tip;
+      };
+      const hide = ()=>{
+        tip.classList.remove('visible');
+        tip.setAttribute('aria-hidden','true');
+        icon.setAttribute('aria-expanded','false');
+        if(openTip === tip){ openTip = null; }
+      };
+
+      icon.addEventListener('click', (e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        if(tip.classList.contains('visible')){ hide(); } else { show(); }
+      });
+      icon.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter' || e.key===' '){
+          e.preventDefault();
+          if(tip.classList.contains('visible')){ hide(); } else { show(); }
+        }
+      });
+    });
+  }
+
+  bindInfoTips();
+
+  document.addEventListener('click', (e)=>{
+    if(e.target.closest('.info-icon') || e.target.closest('.tip')) return;
+    closeTips();
+  });
 
   // Confetti
   function fireConfetti(count=120){
@@ -1155,6 +1258,8 @@
       dirList.appendChild(wrap.firstElementChild);
     });
 
+    bindInfoTips(dirList);
+
     // Expand/Collapse helpers
     function setExpanded(card, expanded){
       const body = card.querySelector('.dir-body');
@@ -1205,26 +1310,6 @@
           setExpanded(card, !expanded);
         }
       });
-    });
-
-    // Info tooltip behaviour (click to toggle; click outside to close)
-    function hideAllTips(){ $$('.tip', dirList).forEach(t=>t.classList.remove('visible')); }
-    dirList.addEventListener('click', (e)=>{
-      const btn = e.target.closest('.info-icon');
-      if(!btn) return;
-      const holder = btn.parentElement;
-      const tip = holder.querySelector('.tip');
-      if(!tip) return;
-      if(!tip.classList.contains('visible')) hideAllTips();
-      tip.textContent = btn.getAttribute('data-tip') || '';
-      // position tip
-      tip.style.top = 'calc(100% + 6px)';
-      tip.style.left = '0';
-      tip.classList.toggle('visible');
-      e.stopPropagation();
-    });
-    document.addEventListener('click', (e)=>{
-      if(!dirList.contains(e.target)) hideAllTips();
     });
 
     // Attach Places to each "Home address (line 1)"
